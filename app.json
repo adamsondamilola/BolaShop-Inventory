@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "BolaShop",
+    "slug": "BolaShop",
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "versionCode": 2,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "com.adamsondamilola.BolaShop"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "description": "An App for keeping stocks, easy recording of transactions and business decisions",
+    "githubUrl": "https://github.com/adamsondamilola"
+  }
+}
