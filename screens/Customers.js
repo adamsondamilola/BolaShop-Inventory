@@ -10,7 +10,8 @@ import {
     KeyboardAvoidingView,
     ScrollView,
     SafeAreaView,
-    Platform
+    Platform,
+    Linking
 } from "react-native"
 import { LinearGradient } from 'expo-linear-gradient'
 import { TextInput } from 'react-native-paper';
@@ -19,34 +20,29 @@ import { COLORS, SIZES, FONTS, icons, images } from "../constants"
 import { STYLES } from "../constants/theme";
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import SettingsModule from "./SettingsModule";
+import dateToString from "../constants/dateToString";
+import DatePicker from "react-native-datepicker";
+import dateTime from "../constants/dateTime";
 
-const OutOfStock = ({ navigation }) => {
+const Customers = ({ navigation }) => {
 
+    const [customersData, setCustomersData] = useState([])
+    const [customersList, setCustomersList] = useState([])
 
-    const [productData, setProductData] = useState([])
-    const [productList, setProductList] = useState([])
-    const [productListNextYear, setProductListNextYear] = useState([])
-
-    const [showPassword, setShowPassword] = React.useState(false)
-
-    const [areas, setAreas] = React.useState([])
-    const [selectedArea, setSelectedArea] = React.useState(null)
     const [modalVisible, setModalVisible] = React.useState(false)
 
     let errMessage = null;
     const [errMsg, setErrMsg] = React.useState(null);
-
+    
+    const [search, setSearch] = useState(null);
     const [shopName, setShopName] = useState(null);
     const [currencySymbol, setCurrencySymbol] = useState(null);
-    const [shopSettings, setShopSettings] = useState([])
 
-    const [dataReceived, setDataReceived] = useState([])
-    const [search, setSearch] = useState(null);
-    const [searchOn, setSearchOn] = useState(false);
-    const [scanned, setScanned] = useState(null);
+    const [fromDate, setFromDate] = useState(dateTime.todayDate)
+    const [toDate, setToDate] = useState(dateTime.todayDate);
+    const [totalCount, setTotalCount] = useState(0);
 
-    const [productsCount, setProductsCount] = useState(0)
+    const [customersCount, setCustomersCount] = useState(0)
 
     var today = new Date();
     var thisYear = today.getFullYear()
@@ -55,7 +51,7 @@ const OutOfStock = ({ navigation }) => {
 
     const [isLoading, setIsLoading] = useState(false);
 
-    const title = "Out of Stock"
+    const title = "Customers"
 
     const getSettings = () => {
         try {
@@ -73,9 +69,10 @@ const OutOfStock = ({ navigation }) => {
     }
 
     useEffect(() => {
-
+      
         getSettings()
     }, [])
+
 
     const number_format = (x) => {
         if (x == '' || x == null) x = 0;
@@ -92,6 +89,7 @@ const OutOfStock = ({ navigation }) => {
 
     function renderHeader() {
         return (
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <TouchableOpacity
                 style={STYLES.headerTitleView}
                 onPress={() => navigation.reset({
@@ -112,6 +110,8 @@ const OutOfStock = ({ navigation }) => {
 
                 <Text style={{ marginLeft: SIZES.padding * 1.5, color: COLORS.white, ...FONTS.h4 }}>{title}</Text>
             </TouchableOpacity>
+            <Text style={{ flex: 1,marginTop: 50, marginLeft: SIZES.padding * 1.5, color: COLORS.white, ...FONTS.h2 }}>{number_format(customersCount)}</Text>
+            </View>
         )
     }
 
@@ -129,7 +129,6 @@ const OutOfStock = ({ navigation }) => {
                     source={images.logo}
                     style={STYLES.logo}
                 />
-
             </View>
         )
     }
@@ -143,7 +142,7 @@ const OutOfStock = ({ navigation }) => {
 
             navigation.reset({
                 index: 0,
-                routes: [{ name: 'ViewProduct', params: { lastroute: 'OutOfStock' } }],
+                routes: [{ name: 'ViewCustomer', params: { lastroute: 'Customers' } }],
             })
 
         } catch (error) {
@@ -151,40 +150,30 @@ const OutOfStock = ({ navigation }) => {
             setIsLoading(false)
             setModalVisible(true)
         }
-
     }
 
-    const getProductList = async () => {
+    const getCustomersData = async () => {
 
         setIsLoading(true)
 
         try {
 
-            var pitems = await AsyncStorage.getItem('productList');
+            var pitems = await AsyncStorage.getItem('customersList');
 
             if (pitems) {
 
                 var x = JSON.parse(pitems)
 
-                setProductData(x)
+                setCustomersData(x)
 
                 let counter = 0
 
-//                for (let y of productData) {
-//                    if (parseInt(y.productQuantity) < 20) {
-                        const result = x.filter(w => parseInt(w.productQuantity) < 20)
-                        setProductList(result.sort((a, b) => a.productQuantity - b.productQuantity).slice(0, 100)) //Ascending order by quantity/i stock
+                setCustomersList(x.sort((a, b) => b.id - a.id).slice(0, 100)) //Ascending order by quantity/i stock
 
-//                    }
-
-//                }
-
-                for (let i = 0; i < productData.length; i++) {
-                    if (productData[i].productQuantity === "0") counter++;
+                for (let i = 0; i < x.length; i++) {
+                    if (x[i].id > 0) counter++;
                 }
-
-                setProductsCount(counter)
-
+                setCustomersCount(counter)
                 setIsLoading(false)
 
             }
@@ -196,174 +185,107 @@ const OutOfStock = ({ navigation }) => {
             setIsLoading(false)
 
         }
+        setIsLoading(false);
+        
+    }
+
+    const filterCustomersList = async (text) => {
+        
+        setIsLoading(true)
+       
+        try {
+            
+            var pitems = await AsyncStorage.getItem('customersList');
+
+            if (pitems) {
+
+                var x = JSON.parse(pitems)
+                setCustomersData(x)
+                if(isNaN(text) === true){
+                    var result = x.filter(w => (w.name).toLowerCase().includes(text.toLowerCase()) === true);
+                    if(result.length > 0){
+                    setCustomersList(result.sort((a, b) => b.id - a.id).slice(0, 100))
+                    }
+                }
+                else{
+                    var result = x.filter(w => (w.phone).includes(text) === true);
+                    if(result.length > 0){
+                        setCustomersList(result.sort((a, b) => b.id - a.id).slice(0, 100))
+                        }
+                } 
+             
+                setIsLoading(false)
+                
+            }
 
 
+        } catch (e) {
+            console.log(e)
+            setErrMsg(null)
+            setIsLoading(false)
+
+        }
+        setIsLoading(false);
+        
     }
 
     useEffect(() => {
        
-        if (AsyncStorage.getItem('productList') && productList.length === 0) {
-//            if (productList.length === 0) {
+        getCustomersData()
 
-            getProductList()
-
-                }
-
-    })
-
-
-
-
-
+    },[])
 
     function renderProducts() {
-
         const renderItem = ({ item }) => (
-            <TouchableOpacity
-                style={{ marginBottom: SIZES.padding * 3, alignItems: 'flex-start', marginTop: 3 }}
-                onPress={() => actionsButton(item.id)}
+            <View
+                style={{ marginBottom: 2, alignItems: 'flex-start', marginTop: 3 }}                
             >
                 <View
                     style={{
                         height: 70,
                         width: '100%',
                         marginBottom: 5,
-                        borderRadius: 20,
+                        borderRadius: 10,
                         justifyContent: 'center',
                         backgroundColor: COLORS.lightGray
                     }}
                 >
-
-                    <Text style={{ textAlign: 'center', flexWrap: 'wrap', fontSize: 18, color: COLORS.black }}>
-                        {item.productName}</Text>
-                    <Text style={{ textAlign: 'center', flexWrap: 'wrap', fontSize: 13, color: COLORS.black }}> In Stock: <Text style={{ fontSize: 18 }}> {item.productQuantity}</Text></Text>
-
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-
-
-                        {parseInt(item.productQuantity) === 0 ? (
-
-                            <Image
-                                source={icons.product}
-                                style={{ width: 30, height: 30, tintColor: COLORS.red }}
-                            />
-
-                        ) :
-
-                            parseInt(item.productQuantity) === 1 ? (
-
-                                <Image
-                                    source={icons.product}
-                                    style={{ width: 30, height: 30, tintColor: COLORS.red }}
-                                />
-
-                            ) :
-
-                                parseInt(item.productQuantity) === 2 ? (
-
-                                    <Image
-                                        source={icons.product}
-                                        style={{ width: 30, height: 30, tintColor: COLORS.primary }}
-                                    />
-
-                                ) :
-
-                                    parseInt(item.productQuantity) === 3 ? (
-
-                                        <Image
-                                            source={icons.product}
-                                            style={{ width: 30, height: 30, tintColor: COLORS.secondary }}
-                                        />
-
-                                    ) :
-
-                                        parseInt(item.productQuantity) > 3 && parseInt(item.productQuantity) < 11 ? (
-
-                                            <Image
-                                                source={icons.product}
-                                                style={{ width: 30, height: 30, tintColor: COLORS.orange }}
-                                            />
-
-                                        ) :
-
-                                            <Image
-                                                source={icons.product}
-                                                style={{ width: 30, height: 30, tintColor: COLORS.emerald }}
-                                            />
-                        }
-
-
-                        <View style={{ flex: 1, height: 1, backgroundColor: COLORS.emerald }} />
-                        <View>
-                            <Text style={{ width: 120, textAlign: 'center', fontSize: 18, color: COLORS.secondary }}> {number_format(item.productSelling)} {currencySymbol} </Text>
+<View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={{flex: 1, fontSize: 18, color: COLORS.black }}>
+                         {item.name}</Text>
+                        <Text style={{flex: 1, textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {(item.phone).slice(0,6)}...</Text>                    
                         </View>
+<View style={{ flexDirection: 'row', alignItems: 'center' }}>
 
-                        <View style={{ flex: 1, height: 1, backgroundColor: COLORS.emerald }} />
+                    <Text style={{ flex: 1, color: COLORS.emerald }} > {dateToString(item.dateAdded)}</Text>
+                        
+                    <TouchableOpacity
+style={{backgroundColor: COLORS.secondary, color: COLORS.white,borderRadius: 5, width: 50,
+    alignItems: 'center', marginRight: 6}}
+onPress={() => actionsButton(item.id)}>
+<Text style={{ flex: 1, color: COLORS.white }} >Details </Text>
 
-                        {parseInt(item.productQuantity) === 0 ? (
+</TouchableOpacity>
+    
+<TouchableOpacity
+style={{backgroundColor: COLORS.emerald, color: COLORS.white,borderRadius: 5, width: 50,
+    alignItems: 'center'}}
+onPress={() => Linking.openURL("tel:"+item.phone)}>
+<Text style={{ flex: 1, color: COLORS.white }} >Call </Text>
 
-                            <Image
-                                source={icons.product}
-                                style={{ width: 30, height: 30, tintColor: COLORS.red }}
-                            />
-
-                        ) :
-
-                            parseInt(item.productQuantity) === 1 ? (
-
-                                <Image
-                                    source={icons.product}
-                                    style={{ width: 30, height: 30, tintColor: COLORS.red }}
-                                />
-
-                            ) :
-
-                                parseInt(item.productQuantity) === 2 ? (
-
-                                    <Image
-                                        source={icons.product}
-                                        style={{ width: 30, height: 30, tintColor: COLORS.primary }}
-                                    />
-
-                                ) :
-
-                                    parseInt(item.productQuantity) === 3 ? (
-
-                                        <Image
-                                            source={icons.product}
-                                            style={{ width: 30, height: 30, tintColor: COLORS.secondary }}
-                                        />
-
-                                    ) :
-
-                                        parseInt(item.productQuantity) > 3 && parseInt(item.productQuantity) < 11 ? (
-
-                                            <Image
-                                                source={icons.product}
-                                                style={{ width: 30, height: 30, tintColor: COLORS.orange }}
-                                            />
-
-                                        ) :
-
-                                            <Image
-                                                source={icons.product}
-                                                style={{ width: 30, height: 30, tintColor: COLORS.emerald }}
-                                            />
-                        }
+</TouchableOpacity>
+    
 
                     </View>
-
-
-
                 </View>
 
 
-            </TouchableOpacity>
+            </View>
         )
 
         return (
             <FlatList
-                data={productList}
+                data={customersList}
                 renderItem={renderItem}
                 style={{ marginTop: SIZES.padding * 2 }}
             />
@@ -440,21 +362,48 @@ const OutOfStock = ({ navigation }) => {
                 </View>
 
                 <SafeAreaView style={STYLES.signupFooter}>
-
-
-
-                    <ScrollView
-                        showsVerticalScrollIndicator={false}
-                        showsHorizontalScrollIndicator={false}
-                        scrollEnabled={false}
-                        style={{ height: 100 }}
+                <TouchableOpacity
+                    style={{
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}
+                    onPress={() => 
+                         navigation.navigate('AddCustomer')
+                    }
+                >
+                    <LinearGradient
+                        colors={["transparent", "transparent"]}
+                        style={STYLES.signUpPage}
                     >
-                        <View style={{ marginTop: SIZES.padding * 2 }}>
-                            <Text style={{ fontSize: 15, color: COLORS.secondary }}>Out of Stock: {number_format(productsCount)}</Text>
+                        <Text style={{
+                            color: COLORS.secondary,
+                            fontWeight: 'bold'
+                        }}>Add Customer</Text>
+                    </LinearGradient>
 
-                        </View>
+                </TouchableOpacity>
 
-                    </ScrollView>
+                <View
+                    style={{
+                        width: '100%',
+                        borderRadius: 10,
+                        justifyContent: 'center'
+                    }}
+                >
+<View>
+                    <TextInput
+                        returnKeyType="next"
+                        value={search}
+                        maxLength={100}
+                        onChangeText={(text) =>{
+                            setSearch(text);
+                            filterCustomersList(text);}}
+                        label='Search'
+                        mode='outlined'
+                        theme={STYLES.textInput}
+                    />
+                </View>
+</View>
                     <ScrollView
                         showsVerticalScrollIndicator={false}
                         showsHorizontalScrollIndicator={false}
@@ -478,14 +427,12 @@ const OutOfStock = ({ navigation }) => {
                         }
 
                     </ScrollView>
-
                 </SafeAreaView>
-
-
             </LinearGradient>
+            
             {renderAreaCodesModal()}
         </KeyboardAvoidingView>
     )
 }
 
-export default OutOfStock;
+export default Customers;

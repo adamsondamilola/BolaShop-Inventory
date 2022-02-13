@@ -786,12 +786,7 @@ const Charts = ({ route, navigation }) => {
     function renderHeader() {
         return (
             <TouchableOpacity
-                style={{
-                    flexDirection: 'row',
-                    alignItems: "center",
-                    marginTop: SIZES.padding * 6,
-                    paddingHorizontal: SIZES.padding * 2
-                }}
+                style={STYLES.headerTitleView}
                 onPress={() => {
                     //  setProductName(null)
                     //navigation.navigate('ViewProduct')
@@ -905,7 +900,6 @@ const Charts = ({ route, navigation }) => {
                 <View>
 
                     {renderHeader()}
-                    {renderLogo()}
 
 
                 </View>

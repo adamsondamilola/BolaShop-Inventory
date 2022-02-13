@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
     View,
     Text,
@@ -10,7 +10,8 @@ import {
     KeyboardAvoidingView,
     ScrollView,
     SafeAreaView,
-    Platform
+    Platform,
+    Linking
 } from "react-native"
 import { LinearGradient } from 'expo-linear-gradient'
 import { TextInput } from 'react-native-paper';
@@ -19,17 +20,17 @@ import { COLORS, SIZES, FONTS, icons, images } from "../constants"
 import { STYLES } from "../constants/theme";
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import SettingsModule from "./SettingsModule";
-import { Constants } from "expo-barcode-scanner";
+import dateToString from "../constants/dateToString";
+import number_format from "../constants/number_format";
 
-const ViewProduct = ({ navigation, route }) => {
+const ViewDebtor = ({ navigation, route }) => {
 
     const [lastRoute, setLastRoute] = React.useState(route.params.lastroute)
     const [modalVisible, setModalVisible] = React.useState(false)
 
     const [delete_, setDelete_] = React.useState(false)
+    const [update, setUpdate] = React.useState(false)
 
-    let errMessage = null;
     const [errMsg, setErrMsg] = React.useState(null);
     const [successMsg, setSuccessMsg] = React.useState(null);
 
@@ -38,11 +39,13 @@ const ViewProduct = ({ navigation, route }) => {
 
     const [isLoading, setIsLoading] = useState(false);
 
-    const title = "Product Details"
+    const [description, setDescription] = useState(null)
+    const [amount, setAmount] = useState(null)
+    const [phone, setPhone] = useState(null)
 
-    const [pageNumber, setPageNumber] = useState(null);
+    const title = "Debtor Details"
 
-    
+    const [pageNumber, setPageNumber] = useState(null);   
 
     const getSettings = () => {
         try {
@@ -60,56 +63,22 @@ const ViewProduct = ({ navigation, route }) => {
     }
 
 
-    const number_format = (x) => {
-        if (x == '' || x == null) x = 0;
-        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
 
 
-    const [productData, setProductData] = useState([])
+    const [customerData, setCustomerData] = useState([])
+    const [customersList, setCustomersList] = useState([])
+    const [debtorsData, setDebtorsData] = useState([])
+    const [debtorsList, setDebtorsList] = useState([])
 
-    const [productList, setProductList] = useState([])
-
-    const getProductDetails = async () => {
-
+    const getDebtorDetails = async () => {
         setIsLoading(true)
-
         try {
-
-            var pitems = await AsyncStorage.getItem('productList');
+            var pitems = await AsyncStorage.getItem('debtorsList');
             if (pitems) {
-
                 var x = JSON.parse(pitems)
-                setProductData(x)
+                setDebtorsData(x)
 
             }
-
-
-        } catch (e) {
-            console.log(e)
-            setErrMsg(null)
-        }
-
-
-        try {
-
-            await AsyncStorage.getItem('pageNumber', (err, result) => {
-                //  console.log(result);
-                let jsonresult = result
-                if (jsonresult != null) {
-                    setPageNumber(jsonresult)
-
-                    for (let x of productData) {
-                        if (x.id == pageNumber) {
-
-                            setProductList(x)
-
-                        }
-                    }
-
-
-                }
-            });
 
         } catch (e) {
             console.log(e)
@@ -118,47 +87,97 @@ const ViewProduct = ({ navigation, route }) => {
 
         setIsLoading(false)
 
+        try {
+if(debtorsData.length > 0)
+{
+            await AsyncStorage.getItem('pageNumber', (err, result) => {
+                //  console.log(result);
+                let jsonresult = result
+                if (jsonresult != null) {
+                    setPageNumber(jsonresult)
+                    for (let x of debtorsData) {
+                        if (x.phone === pageNumber) {
+                            setDebtorsList(x)
+                        }
+                    }
+
+                }
+            });
+}
+
+        } catch (e) {
+            console.log(e)
+            setErrMsg(null)
+        }
     }
 
+    const getCustomerDetails = async () => {
+        try {
+            var pitems = await AsyncStorage.getItem('customersList');
+            if (pitems) {
 
+                var x = JSON.parse(pitems)
+                setCustomerData(x)
 
-    useEffect(() => {
+            }
 
-        if (lastRoute === null || lastRoute === '') {
-            setLastRoute('AllProducts')
+        } catch (e) {
+            console.log(e)
+            setErrMsg(null)
         }
 
-        if (productList.length === 0) {
+        try {
+
+            if(customerData.length > 0){
+            await AsyncStorage.getItem('pageNumber', (err, result) => {
+                //  console.log(result);
+                let jsonresult = result
+                if (jsonresult != null) {
+                    setPageNumber(jsonresult)
+                    for (let x of customerData) {
+                        if (x.phone == pageNumber) {
+                            setCustomersList(x)
+                        }
+                    }
+
+                }
+            });
+
+            }
+        } catch (e) {
+            console.log(e)
+            setErrMsg(null)
+        }
+
+    }
+    let isRendered = useRef(false);
+    useEffect(() => {
+        isRendered = true;
+        if(isRendered){
+        if (lastRoute == null || lastRoute == '') {
+            setLastRoute('Debtors')
+        }
+
+        if (debtorsList.length < 1) {
 
             getSettings()
-
-            getProductDetails()
+            getDebtorDetails();
+            getCustomerDetails()
 
         }
+
+    }else{
+        isRendered = false;
+    }
 
     })
 
-
     function toEditPage() {
-
-        let productList_ = {
-            "id": productList.id,
-            "productCode": productList.productCode,
-            "productName": productList.productName,
-            "productQuantity": productList.productQuantity,
-            "productAmount": productList.productAmount,
-            "productSelling": productList.productSelling,
-            "dateAdded": productList.dateAdded,
-            "expiryDate": { "month": productList.expiryDate.month, "year": productList.expiryDate.year }
-        };
-
-        navigation.reset({
-            index: 0,
-            routes: [{ name: 'EditProduct', params: productList_ }],
-        });
-
+        setPhone(debtorsList.phone)
+        setDescription(debtorsList.description)
+        setAmount(debtorsList.amount)
+        setUpdate(true)
     }
-
 
     function renderHeader() {
         return (
@@ -220,13 +239,13 @@ const ViewProduct = ({ navigation, route }) => {
         setDelete_(false)
         setModalVisible(false)
         try {
-            let data = productData
-            var updated = data.filter(item => item.id !== parseInt(pageNumber))
+            let data = debtorsData
+            var updated = data.filter(item => item.id !== debtorsList.id)
             let newupdate = updated
 
-            await AsyncStorage.setItem('productList', JSON.stringify(newupdate));
+            await AsyncStorage.setItem('debtorsList', JSON.stringify(newupdate));
 
-            setSuccessMsg("Product Deleted!")
+            setSuccessMsg("Details Deleted!")
 
             //alert(successMsg)
             navigation.reset({
@@ -243,15 +262,110 @@ const ViewProduct = ({ navigation, route }) => {
     }
 
 
-    function renderProduct() {
-
-        return (
-            <TouchableOpacity
-                style={{ marginBottom: SIZES.padding * 3, alignItems: 'center', marginTop: 3 }}
+    //function renderDebtorDetails() {
+        const renderDebtorDetails = () => (
+           <View style={{ marginBottom: SIZES.padding * 3, alignItems: 'center', marginTop: 3 }}
             >
                 <View
                     style={{
-                        height: 250,
+                        height: 200,
+                        width: '100%',
+                        borderRadius: 20,
+                        justifyContent: 'center',
+                        backgroundColor: COLORS.lightGray
+                    }}
+                >
+
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                        <Image
+                            source={icons.product}
+                            style={{ width: 30, height: 30, tintColor: COLORS.emerald }}
+                        />
+                        <Text style={{ fontSize: 15 }}> Amount:</Text>
+<Text style={{flex: 1, textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {number_format(debtorsList.amount)}  </Text>                            
+                    </View>
+
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+
+                        <Image
+                            source={icons.info}
+                            style={{ width: 30, height: 30, tintColor: COLORS.secondary }}
+                        />
+                        <Text style={{ fontSize: 15 }}> Description:</Text>
+<Text style={{flex: 1, textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {debtorsList.description}  </Text>
+
+                    </View>
+
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+
+                     
+                           {debtorsList.status === 1 ? 
+    <TouchableOpacity
+    style={{flex: 1, backgroundColor: COLORS.emerald, color: COLORS.white,borderRadius: 5,
+        alignItems: 'center', marginRight: 5}}>
+    <Text style={{ color: COLORS.white }}> Paid </Text>
+    </TouchableOpacity>
+
+    : debtorsList.status === 0 ?
+    
+    <TouchableOpacity
+style={{flex: 1, backgroundColor: COLORS.red, color: COLORS.white,borderRadius: 5, width: 50,
+    alignItems: 'center', marginRight: 5}}>
+<Text style={{color: COLORS.white, textAlign: 'center' }}> Pending </Text>
+</TouchableOpacity>
+
+    : null
+}
+
+{debtorsList.status === 1 ? 
+    <TouchableOpacity
+    onPress={() => markAsPaidOrUnpaid() }
+    style={{flex: 1, backgroundColor: COLORS.red, color: COLORS.white,borderRadius: 5,
+        alignItems: 'center'}}>
+    <Text style={{ color: COLORS.white }}> Mark as Unpaid </Text>
+    </TouchableOpacity>
+
+    : debtorsList.status === 0 ?
+    
+    <TouchableOpacity
+    onPress={() => markAsPaidOrUnpaid() }
+style={{flex: 1, backgroundColor: COLORS.emerald, color: COLORS.white,borderRadius: 5, width: 50,
+    alignItems: 'center'}}>
+<Text style={{color: COLORS.white, textAlign: 'center' }}> Mark as Paid </Text>
+</TouchableOpacity>
+
+    : null
+
+}
+                    </View>
+
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                        <Image
+                            source={icons.date}
+                            style={{ width: 25, height: 25, tintColor: COLORS.orange }}
+                        />
+                        <Text style={{ fontSize: 15 }}> Date Added:</Text>
+                            <Text style={{  flex: 1, textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {dateToString(debtorsList.dateAdded)} </Text>
+                        
+                    </View>
+
+
+                </View>
+
+                {!isLoading && debtorsList != '' ? renderButton() : null}
+
+            </View>
+        )
+
+    
+
+    function renderCustomerDetails() {
+        return (
+            
+            <View style={{ marginBottom: SIZES.padding * 3, alignItems: 'center' }}>
+                <View
+                    style={{
+                        height: 120,
                         width: '100%',
                         marginBottom: 5,
                         borderRadius: 20,
@@ -261,80 +375,62 @@ const ViewProduct = ({ navigation, route }) => {
                 >
 
                     <Text style={{ textAlign: 'center', flexWrap: 'wrap', fontSize: 20, color: COLORS.black, marginBottom: 10 }}>
-                        {productList.productName}</Text>
-
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-                        <Image
-                            source={icons.quantity}
-                            style={{ width: 25, height: 25, tintColor: COLORS.tealGreen }}
-                        />
-                        <Text style={{ fontSize: 15 }}> In Stock: </Text>
-                        <View style={STYLES.alignRight}>
-                            <Text style={{ marginLeft: 17, fontSize: 18, color: COLORS.secondary }}> {productList.productQuantity} </Text>
-                        </View>
-
-                    </View>
+                        {customersList.name}</Text>
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
 
                         <Image
-                            source={icons.product}
+                            source={icons.phone}
                             style={{ width: 30, height: 30, tintColor: COLORS.emerald }}
                         />
-                        <Text style={{ fontSize: 15 }}>Price:</Text>
-                        <View style={STYLES.alignRight}>
-                            <Text style={{ marginLeft: 38, fontSize: 18, color: COLORS.secondary }}> {number_format(productList.productSelling)} {currencySymbol} </Text>
-                        </View>
+                        <TouchableOpacity
+style={{flex: 1}}
+onPress={() => Linking.openURL("tel:"+customersList.phone)}>
+<Text style={{textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {customersList.phone}  </Text>
+</TouchableOpacity>
+                            
 
                     </View>
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
 
                         <Image
-                            source={icons.product}
+                            source={icons.envelope}
                             style={{ width: 30, height: 30, tintColor: COLORS.secondary }}
                         />
-                        <Text style={{ fontSize: 15 }}>Amount:</Text>
-                        <View style={STYLES.alignRight}>
-                            <Text style={{ marginLeft: 19, fontSize: 18, color: COLORS.secondary }}> {number_format(productList.productAmount)} {currencySymbol} </Text>
-                        </View>
+                          <TouchableOpacity
+style={{flex: 1}}
+onPress={customersList.email !== null ? () => Linking.openURL("mailto:"+customersList.email): null}>
+<Text style={{textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {customersList.email}  </Text>
+</TouchableOpacity>
 
                     </View>
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
 
                         <Image
-                            source={icons.expire}
-                            style={{ width: 30, height: 30, tintColor: COLORS.primary }}
+                            source={icons.location}
+                            style={{ width: 30, height: 30, tintColor: COLORS.secondary }}
                         />
-                        <Text style={{ fontSize: 15 }}>Expires:</Text>
-                        <View style={STYLES.alignRight}>
-                            <Text style={{ marginLeft: 23, fontSize: 18, color: COLORS.secondary }}> {!productList.expiryDate ? null : productList.expiryDate.month}-{!productList.expiryDate ? null : productList.expiryDate.year} </Text>
-                        </View>
+                            <Text style={{ flex: 1, textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {customersList.address}</Text>
 
                     </View>
-
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
                         <Image
                             source={icons.date}
                             style={{ width: 25, height: 25, tintColor: COLORS.orange }}
                         />
-                        <Text style={{ fontSize: 15 }}> Added:</Text>
-                        <View>
-                            <Text style={{ marginLeft: 30, fontSize: 18, color: COLORS.secondary }}> {productList.dateAdded} </Text>
-                        </View>
-
+                            <Text style={{  flex: 1, textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {dateToString(customersList.dateAdded)} </Text>
                         
                     </View>
 
 
                 </View>
 
+                
 
-            </TouchableOpacity>
-
-
+            </View>
         )
 
 
@@ -343,43 +439,7 @@ const ViewProduct = ({ navigation, route }) => {
     function renderButton() {
         return (
 
-            <View style={{ marginBottom: 10, alignItems: 'center' }}>
-
-<View>
-
-                            <TouchableOpacity
-                                style={{
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    width: 300,
-                                }}
-                                onPress={() => navigation.reset({
-                                    index: 0,
-                                    routes: [{
-                                        name: 'AddSale',
-                                        params: {
-                                            scanned: true,
-                                            scannedcode: productList.productCode,
-                                        }
-                                    }],
-                                })}
-                            >
-                                <LinearGradient
-                                    colors={[COLORS.secondary, COLORS.secondary]}
-                                    style={STYLES.defaultButton}
-
-
-                                >
-                                    <Text style={{
-                                        color: '#fff',
-                                        fontWeight: 'bold'
-                                    }}>Add to Cart</Text>
-                                </LinearGradient>
-
-                            </TouchableOpacity>
-                        </View>
-
-                
+            <View style={{ marginBottom: 10, alignItems: 'center' }}>                
                 <View>
 
                     <TouchableOpacity
@@ -435,25 +495,197 @@ const ViewProduct = ({ navigation, route }) => {
         )
     }
 
-    function renderBody() {
+    function renderUpdateForm() {
+    
         return (
             <View
                 style={{
-                    marginTop: SIZES.padding * 0,
+                    marginTop: SIZES.padding * 3,
                     marginHorizontal: SIZES.padding * 3,
                 }}
             >
-                <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
-                    {renderFeatures()}
+                <View style={{ marginTop: SIZES.padding * 3 }}>
+                    <TextInput
+                        returnKeyType="next"
+                        keyboardType="number-pad"
+                        value={phone}
+                        editable={false}
+                        maxLength={50}
+                        onChangeText={text => setPhone(text)}
+                        label='Phone Number'
+                        mode='outlined'
+                        theme={STYLES.textInput}
+                    />
+                </View>
 
-                </SafeAreaView>
+                <View style={{ marginTop: SIZES.padding * 3 }}>
+                    <TextInput
+                        returnKeyType="next"
+                        keyboardType="default"
+                        value={description}
+                        onChangeText={text => setDescription(text)}
+                        label='Description'
+                        mode='outlined'
+                        theme={STYLES.textInput}
+                    />
+                </View>
 
+                <View style={{ marginTop: SIZES.padding * 3 }}>
+                    <TextInput
+                        returnKeyType="done"
+                        keyboardType="number-pad"
+                        value={amount}
+                        onChangeText={text => setAmount(text)}
+                        label='Amount'
+                        mode='outlined'
+                        theme={STYLES.textInput}
+                    />
+                </View>
 
+                <View style={{ marginTop: SIZES.padding * 3 }}>
+                {isLoading ?
+                    <TouchableOpacity
+                        style={{
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}
+                    >
+                    <Image source={images.loader} style={{
+                            width: 40, height: 40
+                        }} />
+                    </TouchableOpacity> :
+                (
+                <TouchableOpacity
+                    style={{
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}
+                    onPress={() => updateAction()}
+                >
+                    <LinearGradient
+                        colors={["transparent", "transparent"]}
+                        style={STYLES.signUpPage}
+                    >
+                        <Text style={{
+                            color: COLORS.secondary,
+                            fontWeight: 'bold'
+                        }}>Update Details</Text>
+                    </LinearGradient>
+
+                </TouchableOpacity>
+                    )}
+</View>
             </View>
         )
     }
 
+    const updateAction = async () => {
+        if (!description) setErrMsg("Enter Description.");
+        else if (description.length > 100) setErrMsg("Description too long");
+        else if (!phone) setErrMsg("Enter phone number.");
+        else if (phone.length > 25) setErrMsg("Phone number too long.");
+        else if (isNaN(phone) === true) setErrMsg("Phone number should be numbers.");
+        else if (!amount) setErrMsg("Enter amount.");
+        else if (parseInt(amount) < 1) setErrMsg("Enter a valid amount");
+        else{
+            updateDebtor();
+        }
+    }
 
+    const updateDebtor = async () => {
+        setIsLoading(true)
+        try {
+
+            var pitems = await AsyncStorage.getItem('debtorsList');
+            if (pitems) {
+
+                var x = JSON.parse(pitems)
+                setDebtorsData(x)
+
+            }
+
+
+        } catch (e) {
+            console.log(e)
+            setErrMsg(null)
+        }
+
+        //Find index of specific object using findIndex method.
+        if (debtorsData !== '[]' && debtorsData != '') {
+
+            setModalVisible(false)
+
+            var objIndex = debtorsData.findIndex((obj => obj.id === debtorsList.id));
+
+            //Update object's property.
+            debtorsData[objIndex].description = description
+            debtorsData[objIndex].phone = phone
+            debtorsData[objIndex].amount = amount
+
+            await AsyncStorage.setItem('debtorsList', JSON.stringify(debtorsData));
+
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'ViewDebtor', params: { lastroute: 'Debtors' } }],
+            })
+
+            setIsLoading(false)
+
+        }
+
+        setIsLoading(false)
+        setUpdate(false)
+    }
+
+    const markAsPaidOrUnpaid = async () => {
+        setIsLoading(true)
+        try {
+
+            var pitems = await AsyncStorage.getItem('debtorsList');
+            if (pitems) {
+
+                var x = JSON.parse(pitems)
+                setDebtorsData(x)
+
+            }
+
+
+        } catch (e) {
+            console.log(e)
+            setErrMsg(null)
+        }
+
+        //Find index of specific object using findIndex method.
+        if (debtorsData !== '[]' && debtorsData != '') {
+
+            setModalVisible(false)
+
+            var objIndex = debtorsData.findIndex((obj => obj.id === debtorsList.id));
+
+            //Update object's property.
+            if(debtorsList !== 1){
+                debtorsData[objIndex].status = 1
+            }
+            else{
+                debtorsData[objIndex].status = 0
+            }
+            
+
+            await AsyncStorage.setItem('debtorsList', JSON.stringify(debtorsData));
+
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'ViewDebtor', params: { lastroute: 'Debtors' } }],
+            })
+
+            setIsLoading(false)
+
+        }
+
+        setIsLoading(false)
+        setUpdate(false)
+    }
+    
     function renderAreaCodesModal() {
 
         return (
@@ -493,7 +725,7 @@ const ViewProduct = ({ navigation, route }) => {
                                 <View style={{ marginBottom: 10, alignItems: 'center' }}>
 
                                     <Text style={{ marginLeft: 30, textAlign: "center", marginTop: 30, marginRight: 30, fontSize: 15, color: COLORS.secondary }}>
-                                        Do you want to Delete {productList.productName}?
+                                        Do you want to Delete {customersList.productName}?
                                 </Text>
 
                                     <View>
@@ -591,8 +823,9 @@ const ViewProduct = ({ navigation, route }) => {
                         showsHorizontalScrollIndicator={false}
                         style={{ marginBottom: 25, marginTop: 2 }}
                     >
+                        {!update? renderDebtorDetails(): renderUpdateForm()}
 
-                        {productList == '' ?
+                        {debtorsList == '' ?
                             <TouchableOpacity
                                 style={{
                                     alignItems: 'center',
@@ -603,11 +836,10 @@ const ViewProduct = ({ navigation, route }) => {
                                     width: 40, height: 40
                                 }} />
                             </TouchableOpacity>
-                            : renderProduct()
+                            : null
                         }
 
-                        {!isLoading && productList != '' ? renderButton() : null}
-
+                        {!update? renderCustomerDetails() : null }                       
 
                     </ScrollView>
 
@@ -619,4 +851,4 @@ const ViewProduct = ({ navigation, route }) => {
     )
 }
 
-export default ViewProduct;
+export default ViewDebtor;

@@ -127,7 +127,7 @@ const Dashboard = ({ navigation }) => {
             icon: icons.piechart,
             color: COLORS.secondary,
             backgroundColor: COLORS.lightGray,
-            description: "Charts"
+            description: "Sales Charts"
         },
         {
             id: 5,
@@ -142,6 +142,46 @@ const Dashboard = ({ navigation }) => {
             color: COLORS.secondary,
             backgroundColor: COLORS.lightGray,
             description: "Expires Soon"
+        },        
+        {
+            id: 7,
+            icon: icons.calculator,
+            color: COLORS.emerald,
+            backgroundColor: COLORS.lightGray,
+            description: "Calculator"
+        },        {
+            id: 8,
+            icon: icons.plus,
+            color: COLORS.secondary,
+            backgroundColor: COLORS.lightGray,
+            description: "Add Product"
+        }, {
+            id: 9,
+            icon: icons.qr,
+            color: COLORS.emerald,
+            backgroundColor: COLORS.lightGray,
+            description: "New Sale"
+        },
+        {
+            id: 10,
+            icon: icons.expenses,
+            color: COLORS.secondary,
+            backgroundColor: COLORS.lightGray,
+            description: "Expenses"
+        },
+        {
+            id: 11,
+            icon: icons.debt,
+            color: COLORS.emerald,
+            backgroundColor: COLORS.lightGray,
+            description: "Debtors"
+        },
+        {
+            id: 12,
+            icon: icons.users,
+            color: COLORS.secondary,
+            backgroundColor: COLORS.lightGray,
+            description: "Customers"
         },
     ]
 
@@ -155,25 +195,18 @@ const Dashboard = ({ navigation }) => {
         setIsLoading(true)
 
         try {
-
-            var pitems = await AsyncStorage.getItem('productList');
-            if (pitems) {
-               
-                var x = JSON.parse(pitems)
+            var list = await AsyncStorage.getItem("productList");
+            if (list !== null) {
+                var x = JSON.parse(list)
                 setProductData(x)
                 setProductList(x.sort((a, b) => b.id - a.id).slice(0, 5)) //descending order by id
-
-                if (pitems === '[]') {
-                    await AsyncStorage.removeItem('productList')
-                } 
-
             }
-
-
         } catch (e) {
             console.log(e)
-            setErrMsg(null)
+            setErrMsg(null);
         }
+
+        
 
         setIsLoading(false)
 
@@ -221,45 +254,19 @@ const Dashboard = ({ navigation }) => {
         return (
             <View>
             <View
-                style={{
-                    flexDirection: 'row',
-                    alignItems: "center",
-                    marginTop: SIZES.padding * 6,
-                    paddingHorizontal: SIZES.padding * 2
-                }}
-                
+                style={STYLES.headerTitleView}                
                 >
-                    <TouchableOpacity
-                        style={{
-                            marginTop: 0,
-                            marginRight: 10,
-                            justifyContent: 'flex-end',
-                            alignItems: 'flex-end',
-                        }}
-                        onPress={() => navigation.reset({
-                            index: 0,
-                            routes: [{ name: 'Calculator' }]
-                        })}
-                    >
-                    <Image
-                        source={icons.calculator}
-                    resizeMode="contain"
-                    style={{
-                        width: 35,
-                        height: 35,
-                        tintColor: COLORS.white
-                    }}
-                        />
-                    </TouchableOpacity>
-
+                   
                 <Text style={{ marginLeft: SIZES.padding * 1.5, color: COLORS.white, ...FONTS.h4 }}>{shopName}</Text>
                 </View>
 
                 {productsCount > 0 ?
                     <TouchableOpacity
                         style={{
+                            zIndex: 23,
                             marginTop: 0,
-                            marginRight: 10,
+                            marginBottom: 5,
+                            marginRight: 20,
                             justifyContent: 'flex-end',
                             alignItems: 'flex-end',
                                                   }}
@@ -330,7 +337,7 @@ const Dashboard = ({ navigation }) => {
             await navigation.navigate("AllSales");
         }
 
-        if (description === "Charts") {
+        if (description === "Sales Charts") {
             await navigation.reset({
                 index: 0,
                 routes: [{ name: 'Charts' }],
@@ -348,6 +355,48 @@ const Dashboard = ({ navigation }) => {
             await navigation.reset({
                 index: 0,
                 routes: [{ name: 'ExpiringSoon' }],
+            });
+        }
+
+        if (description === "Calculator") {
+            await navigation.reset({
+                index: 0,
+                routes: [{ name: 'Calculator' }],
+            });
+        }
+
+        if (description === "Add Product") {
+            await navigation.reset({
+                index: 0,
+                routes: [{ name: 'ScanNew' }],
+            });
+        }
+
+        if (description === "New Sale") {
+            await navigation.reset({
+                index: 0,
+                routes: [{ name: 'Scanner' }],
+            });
+        }
+
+        if (description === "Expenses") {
+            await navigation.reset({
+                index: 0,
+                routes: [{ name: 'Expenses' }],
+            });
+        }
+
+        if (description === "Customers") {
+            await navigation.reset({
+                index: 0,
+                routes: [{ name: 'Customers' }],
+            });
+        }
+
+        if (description === "Debtors") {
+            await navigation.reset({
+                index: 0,
+                routes: [{ name: 'Debtors' }],
             });
         }
 
@@ -423,41 +472,39 @@ const Dashboard = ({ navigation }) => {
     function renderProducts() {
 
         const renderItem = ({ item }) => (
-            <TouchableOpacity
-                style={{ marginBottom: SIZES.padding * 3, alignItems: 'flex-start', marginTop: 3 }}
-                onPress={() => viewAction(item.id)}
-            >
-                <View
-                    style={{
-                        height: 70,
-                        width: '100%',
-                        marginBottom: 5,
-                        borderRadius: 20,
-                        justifyContent: 'center',
-                        backgroundColor: COLORS.lightGray
-                    }}
-                >
+          <View
+style={{ marginBottom: 2, alignItems: 'flex-start', marginTop: 3 }}                
+>
+<View
+    style={{
+        height: 70,
+        width: '100%',
+        marginBottom: 5,
+        borderRadius: 10,
+        justifyContent: 'center',
+        backgroundColor: COLORS.lightGray
+    }}
+>
+<View style={{ flexDirection: 'row', alignItems: 'center' }}>
+    <Text style={{flex: 1, fontSize: 18, fontWeight: 'bold', color: COLORS.black }}>
+    {item.productName}</Text>
+    <Text style={{textAlign: 'center', fontSize: 18, color: COLORS.secondary }}> {number_format(item.productSelling)} {currencySymbol} </Text>                    
+        </View>
+<View style={{ flexDirection: 'row', alignItems: 'center' }}>
+    <Text style={{ flex: 1, color: COLORS.black }} >In Stock: {item.productQuantity} {item.expiryDate.month !== null ? (" #Exp :"+ item.expiryDate.month  +"-"+ item.expiryDate.year ) : null }</Text>
+    <TouchableOpacity
+style={{backgroundColor: COLORS.secondary, color: COLORS.white,borderRadius: 5, height: 20, width: 50,
+alignItems: 'center', marginRight: 6}}
+onPress={() => viewAction(item.id)}>
+<Text style={{ flex: 1, color: COLORS.white }} >Details </Text>
 
-                    <Text style={{ textAlign: 'center', flexWrap: 'wrap', fontSize: 18, color: COLORS.black }}>
-                        {item.productName}</Text>
-                    <Text style={{ textAlign: 'center', flexWrap: 'wrap', fontSize: 13, color: COLORS.black }}> In Stock: {item.productQuantity} {item.expiryDate.month !== null ? (", Expires :"+ item.expiryDate.month  +"-"+ item.expiryDate.year ) : null } </Text>
+</TouchableOpacity>
 
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                       
-                         <View style={{ flex: 1, height: 1, backgroundColor: COLORS.emerald }} />
-                        <View>
-                            <Text style={{ width: 120, textAlign: 'center', fontSize: 18, color: COLORS.secondary }}> {number_format(item.productSelling)} {currencySymbol} </Text>
-                        </View>
-                        <View style={{ flex: 1, height: 1, backgroundColor: COLORS.emerald }} />
-                                             
-
-                    </View>
-
-                   
-                </View>
+    </View>
+</View>
 
 
-            </TouchableOpacity>
+</View>
         )
 
         return (
@@ -504,8 +551,7 @@ const Dashboard = ({ navigation }) => {
                 <View>
 
                     {renderHeader()}
-                    {renderLogo()}
-
+                    
                 </View>
 
 
@@ -517,26 +563,13 @@ const Dashboard = ({ navigation }) => {
                             showsVerticalScrollIndicator={false}
                             showsHorizontalScrollIndicator={false}
                             scrollEnabled={false}
-                            style={{ height: 320 }}
+                            style={{ height: 500 }}
                         >
 
                             {renderBody()}
 
                         </ScrollView>
-                        <ScrollView>
-                            <Text style={{
-                                padding: 5,
-                                fontSize: 15,
-                                marginBottom: 25,
-                                color: COLORS.white,
-                                backgroundColor: COLORS.emerald,
-                                marginTop: 5,
-                                textAlign: 'center',
-                                borderBottomRightRadius: 20,
-                                borderBottomLeftRadius: 20
-                            }}> Recently Added Products </Text>
-                        </ScrollView>
-                        <ScrollView
+                       <ScrollView
                             showsVerticalScrollIndicator={false}
                             showsHorizontalScrollIndicator={false}
                             style={{ marginBottom: 25, marginTop: 2 }}

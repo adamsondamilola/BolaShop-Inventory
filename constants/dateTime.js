@@ -9,7 +9,13 @@ let month = monthsList[myDate.getMonth()];
 let year = myDate.getFullYear();
 let day = daysList[myDate.getDay()];
 let dayNum = myDate.getDate();
-let month_ = myDate.getMonth() + 1;
+
+let m = myDate.getMonth() + 1;
+if(m.length < 2){
+    m = "0"+m;
+}
+
+let month_ = m;
 
 let today = `${date} ${month} ${year}, ${day}`;
 
@@ -34,6 +40,7 @@ let currentTime = `${hours}:${minutes} ${amOrPm}`;
 console.log(today + ' ' + currentTime);
 
 const dateNow = today
+const todayDate = `${year}-${month_}-${date}`
 const timeNow = currentTime
 const thisYear = year
 const thisMonth = month_
@@ -43,5 +50,6 @@ export default {
     currentTime,
     thisYear,
     todayDay,
-    thisMonth
+    thisMonth,
+    todayDate
 }

@@ -5,12 +5,21 @@
     <item name="android:editTextStyle">@style/ResetEditText</item>
     <item name="colorPrimary">@color/colorPrimary</item>
     <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+    <item name="android:datePickerDialogTheme">@style/Dialog.Theme</item>
+    <item name="android:timePickerDialogTheme">@style/Dialog.Theme</item>
   </style>
   <style name="ResetEditText" parent="@android:style/Widget.EditText">
     <item name="android:padding">0dp</item>
     <item name="android:textColorHint">#c8c8c8</item>
     <item name="android:textColor">@android:color/black</item>
   </style>
+  <!-- Configuration for Dialog.theme. -->
+<style name="Dialog.Theme" parent="Theme.AppCompat.Light.Dialog">
+  <!-- BackgroundColor of the date modal -->
+    <item name="colorAccent">#ff8000</item>
+    <!-- textColor of the date modal -->
+    <item name="android:textColorPrimary">#000000</item>
+</style>
   <style name="Theme.App.SplashScreen" parent="AppTheme">
     <item name="android:windowBackground">@drawable/splashscreen</item>
   </style>

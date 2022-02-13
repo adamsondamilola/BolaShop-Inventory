@@ -18,17 +18,17 @@ import { COLORS, SIZES, FONTS, icons, images } from "../constants"
 import { STYLES } from "../constants/theme";
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import dateTime from "../constants/dateTime";
 
-const AddProduct = ({ navigation, route }) => {
+const AddDebtor = ({ navigation, route }) => {
 
-    const [modalVisible, setModalVisible] = React.useState(false)
-
+    const [modalVisible, setModalVisible] = React.useState(false);
     const [errMsg, setErrMsg] = React.useState(null);
     const [isLoading, setIsLoading] = useState(false);
 
     const [shopName, setShopName] = useState(null);
     const [currencySymbol, setCurrencySymbol] = useState(null);
-    const [shopSettings, setShopSettings] = useState([])
+    const [shopSettings, setShopSettings] = useState([]);
 
     const [visible, setVisible] = React.useState(false);
 
@@ -36,84 +36,27 @@ const AddProduct = ({ navigation, route }) => {
 
     const closeMenu = () => setVisible(false);
 
-    const [newlyScanned, setNewlyScanned] = useState(route.params.scannedcode)
-    const [productName, setProductName] = useState(null)
-    const [productQuantity, setProductQuantity] = useState(null)
-    const [productAmount, setProductAmount] = useState(null)
-    const [productSelling, setProductSelling] = useState(null)
-    const [productExpiryYear, setProductExpiryYear] = useState(null)
-    const [productExpiryMonth, setProductExpiryMonth] = useState(null)
+    const [phone, setPhone] = useState(null)
+    const [description, setDescription] = useState(null)
+    const [amount, setAmount] = useState(null)
     const [id, setId] = useState(1)
-
-    var today = new Date();
-    var dateNow = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
 
     const [ifExists, setIfExists] = useState(false)
 
-    let productList = [{
+    let debtorsList = [{
         "id": id,
-        "productCode": newlyScanned,
-        "productName": productName,
-        "productQuantity": productQuantity,
-        "productAmount": productAmount,
-        "productSelling": productSelling,
-        "dateAdded": dateNow,
-        "expiryDate": { "month": productExpiryMonth, "year": productExpiryYear }
+        "status": 0,
+        "phone": phone,
+        "amount": amount,
+        "description": description,
+        "dateAdded": dateTime.todayDate
     }];
 
-
-
-    const checkIfCodeExists = async () => {
-        
-        var counter_ = 0
-        try {
-            setIsLoading(true)
-            var prods = await AsyncStorage.getItem('productList');
-            if (prods) {
-                var y = JSON.parse(prods)
-
-                for (let i = 0; i < y.length; i++) {
-                    if (y[i].productCode === newlyScanned) counter_++;
-                }
-
-                if (counter_ > 0) {
-                    
-                    for (let x of y) {
-                        if (x.productCode == newlyScanned) {
-
-                            await AsyncStorage.setItem('pageNumber', JSON.stringify(x.id));
-
-                                navigation.reset({
-                                    index: 0,
-                                    routes: [{ name: 'ViewProduct', params: { lastroute: 'Dashboard' } }],
-                                })
-
-
-                            setIsLoading(false)
-
-                        }
-                    }
-                    setIfExists(true)
-                }
-
-
-            }
-            setIsLoading(false)
-        } catch (e) {
-            setIsLoading(false)
-            setModalVisible(true)
-        }
-
-    }
-
-
+    
     const resetFields = () => {
-        setProductQuantity(null)
-        setProductSelling(null)
-        setProductName(null)
-        setProductAmount(null)
-        setProductExpiryMonth(null)
-        setProductExpiryYear(null)
+        setPhone(null)
+        setDescription(null)
+        setAmount(null)
     }
 
     
@@ -134,7 +77,7 @@ const AddProduct = ({ navigation, route }) => {
 
     useEffect(() => {
 
-            checkIfCodeExists()
+          //  checkIfCodeExists()
 
     }, [])
 
@@ -144,20 +87,42 @@ const AddProduct = ({ navigation, route }) => {
     }, [])
 
     const saved = () => {
-        setIsLoading(false)
+        resetFields();
+        setIsLoading(false);
         navigation.reset({
             index: 0,
-            routes: [{ name: 'Dashboard' }],
-        })
+            routes: [{ name: 'Debtors' }],
+        });
     }
 
+    const checkIfNumberExists = async (phone) => {
+        let response = false;
+        try {    
+            var pitems = await AsyncStorage.getItem('customersList');    
+            if (pitems) {    
+                var x = JSON.parse(pitems)
+                var filtered = x.filter(item => item.phone == parseFloat(phone))
 
+            if(filtered.length > 0)
+            {                
+                response = true;
+            }
+            else{
+                response = false;
+            }
+    
+            }    
+        } catch (e) {
+            response = false;
+        } 
+        return response; 
+       }
 
     const addAction = async () => {
         let counter_ = 0;
         try {
             setIsLoading(true)
-            var prods = await AsyncStorage.getItem('productList');
+            var prods = await AsyncStorage.getItem('debtorsList');
             if (prods) {
                 var y = JSON.parse(prods)
             
@@ -173,23 +138,26 @@ const AddProduct = ({ navigation, route }) => {
         }
         
 //        setIsLoading(false)
-
-        if (!productQuantity) setErrMsg("Enter Quantity.");
-        else if (!productSelling) setErrMsg("Enter Selling Price.");
-        else if (!productName) setErrMsg("Enter Name of Product.");
-        else if (!productAmount) setErrMsg("Enter Product Amount.");
-        else if (parseInt(productSelling) < parseInt(productAmount)) setErrMsg("Sorry, selling price can not be less than amount purchased");
-        else if (counter_ > 0) {
-            setErrMsg("Product Name Already Exists. Use a different name")
-        }
-
+let cNum = true;
+if(phone.length > 0){
+    cNum = await checkIfNumberExists(phone);
+}
+        if (!description) setErrMsg("Enter Description.");
+        else if (description.length > 100) setErrMsg("Description too long");
+        else if (!phone) setErrMsg("Enter phone number.");
+        else if (phone.length > 25) setErrMsg("Phone number too long.");
+        else if (isNaN(phone) === true) setErrMsg("Phone number should be numbers.");
+        else if (!cNum) setErrMsg("Phone number is not associated with any customer. Add profile to customers list");
+        else if (!amount) setErrMsg("Enter amount.");
+        else if (parseInt(amount) < 1) setErrMsg("Enter a valid amount");
+        
         else {
             setErrMsg(null)
 
             try {
-            //  await AsyncStorage.removeItem('productList')
+
                 setIsLoading(true)
-                var pitems = await AsyncStorage.getItem('productList');
+                var pitems = await AsyncStorage.getItem('debtorsList');
                 if (pitems) {
 
                     var x = JSON.parse(pitems)
@@ -201,25 +169,22 @@ const AddProduct = ({ navigation, route }) => {
                     let row = counter - 1
                     let lastId = x[row].id
                     let newId = lastId + 1
-
                     
 
                     if (newId > lastId) {
 
-                        let productList_ = {
+                        let debtorsList_ = {
                             "id": newId,
-                            "productCode": newlyScanned,
-                            "productName": productName,
-                            "productQuantity": productQuantity,
-                            "productAmount": productAmount,
-                            "productSelling": productSelling,
-                            "dateAdded": dateNow,
-                            "expiryDate": { "month": productExpiryMonth, "year": productExpiryYear }
+                            "status": 0,
+                            "phone": phone,
+                            "amount": amount,
+                            "description": description,
+                            "dateAdded": dateTime.todayDate
                         };
 
-                        x.push(productList_) //Add new list to old list in local storage
+                        x.push(debtorsList_) //Add new list to old list in local storage
 
-                        await AsyncStorage.setItem("productList", JSON.stringify(x)) //JSON.stringify converts JS object to JSON
+                        await AsyncStorage.setItem("debtorsList", JSON.stringify(x)) //JSON.stringify converts JS object to JSON
 
                         saved()
 
@@ -228,17 +193,17 @@ const AddProduct = ({ navigation, route }) => {
                     setIsLoading(false)
                     
                 } else {
-                    await AsyncStorage.setItem('productList', JSON.stringify(productList));
+                    await AsyncStorage.setItem('debtorsList', JSON.stringify(debtorsList));
                     saved()
                 }
              
-                const items_ = await AsyncStorage.getItem('productList');
+                const items_ = await AsyncStorage.getItem('debtorsList');
                 if (items_ !== null)
                     console.log(JSON.parse(items_));
 
                 
             } catch (e) {
-                await AsyncStorage.setItem('productList', JSON.stringify(productList));
+                await AsyncStorage.setItem('debtorsList', JSON.stringify(debtorsList));
                     saved()
                 console.log(e)
                 setErrMsg(null)                
@@ -256,13 +221,8 @@ const AddProduct = ({ navigation, route }) => {
     function renderHeader() {
         return (
             <TouchableOpacity
-                style={{
-                    flexDirection: 'row',
-                    alignItems: "center",
-                    marginTop: SIZES.padding * 6,
-                    paddingHorizontal: SIZES.padding * 2
-                }}
-                onPress={() => navigation.goBack()}
+                style={STYLES.headerTitleView}
+                onPress={() =>  navigation.navigate('Debtors')}
             >
                 <Image
                     source={icons.back}
@@ -274,7 +234,7 @@ const AddProduct = ({ navigation, route }) => {
                     }}
                 />
 
-                <Text style={{ marginLeft: SIZES.padding * 1.5, color: COLORS.white, ...FONTS.h4 }}>Add Product</Text>
+                <Text style={{ marginLeft: SIZES.padding * 1.5, color: COLORS.white, ...FONTS.h4 }}>Add Debtor</Text>
             </TouchableOpacity>
         )
     }
@@ -312,21 +272,11 @@ const AddProduct = ({ navigation, route }) => {
                 <View style={{ marginTop: SIZES.padding * 3 }}>
                     <TextInput
                         returnKeyType="next"
-                        value={productName}
-                        onChangeText={text => setProductName(text)}
-                        label='Product Name'
-                        mode='outlined'
-                        theme={STYLES.textInput}
-                    />
-                </View>
-
-                <View style={{ marginTop: SIZES.padding * 3 }}>
-                    <TextInput
-                        returnKeyType="next"
                         keyboardType="number-pad"
-                        value={productAmount}
-                        onChangeText={text => setProductAmount(text)}
-                        label='Product Amount'
+                        value={phone}
+                        maxLength={50}
+                        onChangeText={text => setPhone(text)}
+                        label='Phone Number'
                         mode='outlined'
                         theme={STYLES.textInput}
                     />
@@ -335,10 +285,10 @@ const AddProduct = ({ navigation, route }) => {
                 <View style={{ marginTop: SIZES.padding * 3 }}>
                     <TextInput
                         returnKeyType="next"
-                        keyboardType="numeric"
-                        value={productSelling}
-                        onChangeText={text => setProductSelling(text)}
-                        label='Selling Price'
+                        keyboardType="default"
+                        value={description}
+                        onChangeText={text => setDescription(text)}
+                        label='Description'
                         mode='outlined'
                         theme={STYLES.textInput}
                     />
@@ -346,40 +296,11 @@ const AddProduct = ({ navigation, route }) => {
 
                 <View style={{ marginTop: SIZES.padding * 3 }}>
                     <TextInput
-                        returnKeyType="next"
-                        keyboardType="numeric"
-                        value={productExpiryMonth}
-                        onChangeText={text => setProductExpiryMonth(text)}
-                        label='Expiry Month'
-                        mode='outlined'
-                        maxLength={2}
-                        theme={STYLES.textInput}
-                    />
-
-                    <TextInput
-                        returnKeyType="next"
-                        keyboardType="numeric"
-                        value={productExpiryYear}
-                        onChangeText={text => setProductExpiryYear(text)}
-                        label='Expiry Year'
-                        mode='outlined'
-                        mask="YYYY"
-                        maxLength={4}
-                        theme={STYLES.textInput}
-                    />
-
-          
-
-                </View>
-
-                <View style={{ marginTop: SIZES.padding * 3 }}>
-                    <TextInput
-                        keyboardType='default'
-                        returnKeyType='done'
-                        keyboardType="numeric"
-                        value={productQuantity}
-                        onChangeText={text => setProductQuantity(text)}
-                        label='In Stock'
+                        returnKeyType="done"
+                        keyboardType="number-pad"
+                        value={amount}
+                        onChangeText={text => setAmount(text)}
+                        label='Amount'
                         mode='outlined'
                         theme={STYLES.textInput}
                     />
@@ -418,9 +339,9 @@ const AddProduct = ({ navigation, route }) => {
                         style={STYLES.signUpPage}
                     >
                         <Text style={{
-                            color: '#ff4000',
+                            color: COLORS.secondary,
                             fontWeight: 'bold'
-                        }}>Add New</Text>
+                        }}>Add Debtor</Text>
                     </LinearGradient>
 
                 </TouchableOpacity>
@@ -494,7 +415,6 @@ const AddProduct = ({ navigation, route }) => {
                 <View>
 
                     {renderHeader()}
-                    {renderLogo()}
 
 
                 </View>
@@ -514,4 +434,4 @@ const AddProduct = ({ navigation, route }) => {
     )
 }
 
-export default AddProduct;
+export default AddDebtor;

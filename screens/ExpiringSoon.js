@@ -109,12 +109,7 @@ const ExpiringSoon = ({ navigation }) => {
     function renderHeader() {
         return (
             <TouchableOpacity
-                style={{
-                    flexDirection: 'row',
-                    alignItems: "center",
-                    marginTop: SIZES.padding * 6,
-                    paddingHorizontal: SIZES.padding * 2
-                }}
+                style={STYLES.headerTitleView}
                 onPress={() => navigation.reset({
                     index: 0,
                     routes: [{ name: 'Dashboard' }],
@@ -638,7 +633,6 @@ const ExpiringSoon = ({ navigation }) => {
                 <View>
 
                     {renderHeader()}
-                    {renderLogo()}
 
                 </View>
 

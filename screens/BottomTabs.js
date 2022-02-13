@@ -21,6 +21,15 @@ import TodaysSales from './TodaysSales';
 import OutOfStock from './OutOfStock';
 import Charts from './Charts';
 import Calculator from './Calculator';
+import Expenses from './Expenses';
+import AddExpenses from './AddExpenses';
+import ViewExpenses from './ViewExpenses';
+import Customers from './Customers';
+import AddCustomer from './AddCustomer';
+import ViewCustomer from './ViewCustomer';
+import Debtors from './Debtors';
+import AddDebtor from './AddDebtor';
+import ViewDebtor from './ViewDebtor';
 
 const Tab = createBottomTabNavigator();
 
@@ -95,7 +104,7 @@ const BottomTabs = () => {
                                     tintColor: focused ? COLORS.secondary : COLORS.emerald
                                 }}
                             />
-                            <Text style={{ color: focused ? COLORS.secondary : COLORS.emerald, fontSize: 12 }} >Home</Text>
+                            <Text style={{ color: focused ? COLORS.secondary : COLORS.emerald, fontSize: 12 }} >Dashboard</Text>
                         </View>
                         ),
                 }}
@@ -261,6 +270,68 @@ const BottomTabs = () => {
                 }}
             />
 
+<Tab.Screen name="Expenses" component={Expenses}
+                options={{
+                    tabBarButton: () => null,
+                    tabBarVisible: false,
+                }}
+            />
+<Tab.Screen name="AddExpenses" component={AddExpenses}
+                options={{
+                    tabBarButton: () => null,
+                    tabBarVisible: false,
+                }}
+            />
+
+<Tab.Screen name="ViewExpenses" component={ViewExpenses}
+                options={{
+                    tabBarButton: () => null,
+                    tabBarVisible: false,
+                }}
+            />
+
+<Tab.Screen name="Customers" component={Customers}
+                options={{
+                    tabBarButton: () => null,
+                    tabBarVisible: false,
+                }}
+            />
+
+            <Tab.Screen name="AddCustomer" component={AddCustomer}
+                            options={{
+                                tabBarButton: () => null,
+                                tabBarVisible: false,
+                            }}
+                        />
+            
+            <Tab.Screen name="ViewCustomer" component={ViewCustomer}
+                options={{
+                    tabBarButton: () => null,
+                    tabBarVisible: false,
+                }}
+            />
+            
+            <Tab.Screen name="Debtors" component={Debtors}
+                options={{
+                    tabBarButton: () => null,
+                    tabBarVisible: false,
+                }}
+            />
+            
+            <Tab.Screen name="AddDebtor" component={AddDebtor}
+                options={{
+                    tabBarButton: () => null,
+                    tabBarVisible: false,
+                }}
+            />
+            
+            <Tab.Screen name="ViewDebtor" component={ViewDebtor}
+                options={{
+                    tabBarButton: () => null,
+                    tabBarVisible: false,
+                }}
+            />
+            
             </Tab.Navigator>
 
 

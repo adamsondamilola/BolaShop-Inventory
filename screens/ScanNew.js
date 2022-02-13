@@ -207,7 +207,16 @@ const ScanNew = ({ navigation }) => {
                     {/*{scanned ? actionsButton() : null }*/}
                     {scanned && <Button title={'Tap to Scan Again'} onPress={() => setScanned(false)} />}
                 </View>
-                : null}
+                : navigation.reset({
+                    index: 0,
+                    routes: [{
+                        name: 'AddProduct',
+                        params: {
+                            scanned: scanned,
+                            scannedcode: code,
+                        }
+                    }],
+                })}
         </LinearGradient>
     );
 }

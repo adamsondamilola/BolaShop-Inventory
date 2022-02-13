@@ -10,7 +10,8 @@ import {
     KeyboardAvoidingView,
     ScrollView,
     SafeAreaView,
-    Platform
+    Platform,
+    Linking
 } from "react-native"
 import { LinearGradient } from 'expo-linear-gradient'
 import { TextInput } from 'react-native-paper';
@@ -19,15 +20,15 @@ import { COLORS, SIZES, FONTS, icons, images } from "../constants"
 import { STYLES } from "../constants/theme";
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import SettingsModule from "./SettingsModule";
-import { Constants } from "expo-barcode-scanner";
+import dateToString from "../constants/dateToString";
 
-const ViewProduct = ({ navigation, route }) => {
+const ViewCustomer = ({ navigation, route }) => {
 
     const [lastRoute, setLastRoute] = React.useState(route.params.lastroute)
     const [modalVisible, setModalVisible] = React.useState(false)
 
     const [delete_, setDelete_] = React.useState(false)
+    const [update, setUpdate] = React.useState(false)
 
     let errMessage = null;
     const [errMsg, setErrMsg] = React.useState(null);
@@ -38,11 +39,16 @@ const ViewProduct = ({ navigation, route }) => {
 
     const [isLoading, setIsLoading] = useState(false);
 
-    const title = "Product Details"
+    const [name, setName] = useState(null)
+    const [phone, setPhone] = useState(null)
+    const [email, setEmail] = useState(null)
+    const [address, setAddress] = useState(null)
+
+    const title = "Customer Details"
 
     const [pageNumber, setPageNumber] = useState(null);
 
-    
+   
 
     const getSettings = () => {
         try {
@@ -66,30 +72,28 @@ const ViewProduct = ({ navigation, route }) => {
     }
 
 
-    const [productData, setProductData] = useState([])
+    const [customerData, setCustomerData] = useState([])
 
-    const [productList, setProductList] = useState([])
+    const [customersList, setCustomersList] = useState([])
 
-    const getProductDetails = async () => {
+    const getCustomerDetails = async () => {
 
         setIsLoading(true)
 
         try {
 
-            var pitems = await AsyncStorage.getItem('productList');
+            var pitems = await AsyncStorage.getItem('customersList');
             if (pitems) {
 
                 var x = JSON.parse(pitems)
-                setProductData(x)
+                setCustomerData(x)
 
             }
-
 
         } catch (e) {
             console.log(e)
             setErrMsg(null)
         }
-
 
         try {
 
@@ -99,14 +103,13 @@ const ViewProduct = ({ navigation, route }) => {
                 if (jsonresult != null) {
                     setPageNumber(jsonresult)
 
-                    for (let x of productData) {
+                    for (let x of customerData) {
                         if (x.id == pageNumber) {
 
-                            setProductList(x)
+                            setCustomersList(x)
 
                         }
                     }
-
 
                 }
             });
@@ -125,14 +128,14 @@ const ViewProduct = ({ navigation, route }) => {
     useEffect(() => {
 
         if (lastRoute === null || lastRoute === '') {
-            setLastRoute('AllProducts')
+            setLastRoute('Customers')
         }
 
-        if (productList.length === 0) {
+        if (customersList.length === 0) {
 
             getSettings()
 
-            getProductDetails()
+            getCustomerDetails()
 
         }
 
@@ -140,25 +143,12 @@ const ViewProduct = ({ navigation, route }) => {
 
 
     function toEditPage() {
-
-        let productList_ = {
-            "id": productList.id,
-            "productCode": productList.productCode,
-            "productName": productList.productName,
-            "productQuantity": productList.productQuantity,
-            "productAmount": productList.productAmount,
-            "productSelling": productList.productSelling,
-            "dateAdded": productList.dateAdded,
-            "expiryDate": { "month": productList.expiryDate.month, "year": productList.expiryDate.year }
-        };
-
-        navigation.reset({
-            index: 0,
-            routes: [{ name: 'EditProduct', params: productList_ }],
-        });
-
+        setName(customersList.name)
+        setAddress(customersList.address)
+        setPhone(customersList.phone)
+        setEmail(customersList.email)
+        setUpdate(true)
     }
-
 
     function renderHeader() {
         return (
@@ -220,13 +210,13 @@ const ViewProduct = ({ navigation, route }) => {
         setDelete_(false)
         setModalVisible(false)
         try {
-            let data = productData
+            let data = customerData
             var updated = data.filter(item => item.id !== parseInt(pageNumber))
             let newupdate = updated
 
-            await AsyncStorage.setItem('productList', JSON.stringify(newupdate));
+            await AsyncStorage.setItem('customersList', JSON.stringify(newupdate));
 
-            setSuccessMsg("Product Deleted!")
+            setSuccessMsg("Details Deleted!")
 
             //alert(successMsg)
             navigation.reset({
@@ -246,12 +236,12 @@ const ViewProduct = ({ navigation, route }) => {
     function renderProduct() {
 
         return (
-            <TouchableOpacity
+            <View
                 style={{ marginBottom: SIZES.padding * 3, alignItems: 'center', marginTop: 3 }}
             >
                 <View
                     style={{
-                        height: 250,
+                        height: 200,
                         width: '100%',
                         marginBottom: 5,
                         borderRadius: 20,
@@ -261,80 +251,62 @@ const ViewProduct = ({ navigation, route }) => {
                 >
 
                     <Text style={{ textAlign: 'center', flexWrap: 'wrap', fontSize: 20, color: COLORS.black, marginBottom: 10 }}>
-                        {productList.productName}</Text>
-
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-                        <Image
-                            source={icons.quantity}
-                            style={{ width: 25, height: 25, tintColor: COLORS.tealGreen }}
-                        />
-                        <Text style={{ fontSize: 15 }}> In Stock: </Text>
-                        <View style={STYLES.alignRight}>
-                            <Text style={{ marginLeft: 17, fontSize: 18, color: COLORS.secondary }}> {productList.productQuantity} </Text>
-                        </View>
-
-                    </View>
+                        {customersList.name}</Text>
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
 
                         <Image
-                            source={icons.product}
+                            source={icons.phone}
                             style={{ width: 30, height: 30, tintColor: COLORS.emerald }}
                         />
-                        <Text style={{ fontSize: 15 }}>Price:</Text>
-                        <View style={STYLES.alignRight}>
-                            <Text style={{ marginLeft: 38, fontSize: 18, color: COLORS.secondary }}> {number_format(productList.productSelling)} {currencySymbol} </Text>
-                        </View>
+                        <TouchableOpacity
+style={{flex: 1}}
+onPress={() => Linking.openURL("tel:"+customersList.phone)}>
+<Text style={{textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {customersList.phone}  </Text>
+</TouchableOpacity>
+                            
 
                     </View>
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
 
                         <Image
-                            source={icons.product}
+                            source={icons.envelope}
                             style={{ width: 30, height: 30, tintColor: COLORS.secondary }}
                         />
-                        <Text style={{ fontSize: 15 }}>Amount:</Text>
-                        <View style={STYLES.alignRight}>
-                            <Text style={{ marginLeft: 19, fontSize: 18, color: COLORS.secondary }}> {number_format(productList.productAmount)} {currencySymbol} </Text>
-                        </View>
+                          <TouchableOpacity
+style={{flex: 1}}
+onPress={customersList.email !== null ? () => Linking.openURL("mailto:"+customersList.email): null}>
+<Text style={{textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {customersList.email}  </Text>
+</TouchableOpacity>
 
                     </View>
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
 
                         <Image
-                            source={icons.expire}
-                            style={{ width: 30, height: 30, tintColor: COLORS.primary }}
+                            source={icons.location}
+                            style={{ width: 30, height: 30, tintColor: COLORS.secondary }}
                         />
-                        <Text style={{ fontSize: 15 }}>Expires:</Text>
-                        <View style={STYLES.alignRight}>
-                            <Text style={{ marginLeft: 23, fontSize: 18, color: COLORS.secondary }}> {!productList.expiryDate ? null : productList.expiryDate.month}-{!productList.expiryDate ? null : productList.expiryDate.year} </Text>
-                        </View>
+                            <Text style={{ flex: 1, textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {customersList.address}</Text>
 
                     </View>
-
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
                         <Image
                             source={icons.date}
                             style={{ width: 25, height: 25, tintColor: COLORS.orange }}
                         />
-                        <Text style={{ fontSize: 15 }}> Added:</Text>
-                        <View>
-                            <Text style={{ marginLeft: 30, fontSize: 18, color: COLORS.secondary }}> {productList.dateAdded} </Text>
-                        </View>
-
+                            <Text style={{  flex: 1, textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {dateToString(customersList.dateAdded)} </Text>
                         
                     </View>
 
 
                 </View>
 
+                {!isLoading && customersList != '' ? renderButton() : null}
 
-            </TouchableOpacity>
-
-
+            </View>
         )
 
 
@@ -343,43 +315,7 @@ const ViewProduct = ({ navigation, route }) => {
     function renderButton() {
         return (
 
-            <View style={{ marginBottom: 10, alignItems: 'center' }}>
-
-<View>
-
-                            <TouchableOpacity
-                                style={{
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    width: 300,
-                                }}
-                                onPress={() => navigation.reset({
-                                    index: 0,
-                                    routes: [{
-                                        name: 'AddSale',
-                                        params: {
-                                            scanned: true,
-                                            scannedcode: productList.productCode,
-                                        }
-                                    }],
-                                })}
-                            >
-                                <LinearGradient
-                                    colors={[COLORS.secondary, COLORS.secondary]}
-                                    style={STYLES.defaultButton}
-
-
-                                >
-                                    <Text style={{
-                                        color: '#fff',
-                                        fontWeight: 'bold'
-                                    }}>Add to Cart</Text>
-                                </LinearGradient>
-
-                            </TouchableOpacity>
-                        </View>
-
-                
+            <View style={{ marginBottom: 10, alignItems: 'center' }}>                
                 <View>
 
                     <TouchableOpacity
@@ -435,25 +371,157 @@ const ViewProduct = ({ navigation, route }) => {
         )
     }
 
-    function renderBody() {
+    function renderUpdateForm() {
+    
         return (
             <View
                 style={{
-                    marginTop: SIZES.padding * 0,
+                    marginTop: SIZES.padding * 3,
                     marginHorizontal: SIZES.padding * 3,
                 }}
             >
-                <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
-                    {renderFeatures()}
+                <View style={{ marginTop: SIZES.padding * 3 }}>
+                    <TextInput
+                        returnKeyType="next"
+                        value={name}
+                        maxLength={50}
+                        onChangeText={text => setName(text)}
+                        label='Full Name'
+                        mode='outlined'
+                        theme={STYLES.textInput}
+                    />
+                </View>
 
-                </SafeAreaView>
+                <View style={{ marginTop: SIZES.padding * 3 }}>
+                    <TextInput
+                        returnKeyType="next"
+                        keyboardType="number-pad"
+                        editable={false}
+                        value={phone}
+                        onChangeText={text => setPhone(text)}
+                        label='Phone Number'
+                        mode='outlined'
+                        theme={STYLES.textInput}
+                    />
+                </View>
 
+                <View style={{ marginTop: SIZES.padding * 3 }}>
+                    <TextInput
+                        returnKeyType="next"
+                        keyboardType="email-address"
+                        value={email}
+                        onChangeText={text => setEmail(text)}
+                        label='Email (Optional)'
+                        mode='outlined'
+                        theme={STYLES.textInput}
+                    />
+                </View>
 
+                <View style={{ marginTop: SIZES.padding * 3 }}>
+                    <TextInput
+                        returnKeyType="next"
+                        keyboardType="default"
+                        value={address}
+                        onChangeText={text => setAddress(text)}
+                        label='Address (Optional)'
+                        mode='outlined'
+                        theme={STYLES.textInput}
+                    />
+                </View>
+
+                <View style={{ marginTop: SIZES.padding * 3 }}>
+                {isLoading ?
+                    <TouchableOpacity
+                        style={{
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}
+                    >
+                    <Image source={images.loader} style={{
+                            width: 40, height: 40
+                        }} />
+                    </TouchableOpacity> :
+                (
+                <TouchableOpacity
+                    style={{
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}
+                    onPress={() => updateAction()}
+                >
+                    <LinearGradient
+                        colors={["transparent", "transparent"]}
+                        style={STYLES.signUpPage}
+                    >
+                        <Text style={{
+                            color: COLORS.secondary,
+                            fontWeight: 'bold'
+                        }}>Update Details</Text>
+                    </LinearGradient>
+
+                </TouchableOpacity>
+                    )}
+</View>
             </View>
         )
     }
 
+    const updateAction = async () => {
+        if (!name) setErrMsg("Enter name.");
+        else if (!phone) setErrMsg("Enter phone number.");
+        else if (phone.length > 25) setErrMsg("Phone number too long.");
+        else if (isNaN(phone) === true) setErrMsg("Phone number should be numbers.");
+        else{
+            updateCustomer();
+        }
+    }
 
+    const updateCustomer = async () => {
+        setIsLoading(true)
+        try {
+
+            var pitems = await AsyncStorage.getItem('customersList');
+            if (pitems) {
+
+                var x = JSON.parse(pitems)
+                setCustomerData(x)
+
+            }
+
+
+        } catch (e) {
+            console.log(e)
+            setErrMsg(null)
+        }
+
+        //Find index of specific object using findIndex method.
+        if (customerData !== '[]' && customerData != '') {
+
+            setModalVisible(false)
+
+            var objIndex = customerData.findIndex((obj => obj.id === parseInt(customersList.id)));
+
+            //Update object's property.
+            customerData[objIndex].name = name
+            customerData[objIndex].phone = phone
+            customerData[objIndex].email = email
+            customerData[objIndex].address = address
+
+            await AsyncStorage.setItem('customersList', JSON.stringify(customerData));
+
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'ViewCustomer', params: { lastroute: 'Customers' } }],
+            })
+
+            setIsLoading(false)
+
+        }
+
+        setIsLoading(false)
+        setUpdate(false)
+    }
+    
     function renderAreaCodesModal() {
 
         return (
@@ -493,7 +561,7 @@ const ViewProduct = ({ navigation, route }) => {
                                 <View style={{ marginBottom: 10, alignItems: 'center' }}>
 
                                     <Text style={{ marginLeft: 30, textAlign: "center", marginTop: 30, marginRight: 30, fontSize: 15, color: COLORS.secondary }}>
-                                        Do you want to Delete {productList.productName}?
+                                        Do you want to Delete {customersList.productName}?
                                 </Text>
 
                                     <View>
@@ -592,7 +660,9 @@ const ViewProduct = ({ navigation, route }) => {
                         style={{ marginBottom: 25, marginTop: 2 }}
                     >
 
-                        {productList == '' ?
+                        {!update? renderProduct() : renderUpdateForm() }
+                        
+                        {customersList == '' ?
                             <TouchableOpacity
                                 style={{
                                     alignItems: 'center',
@@ -603,11 +673,8 @@ const ViewProduct = ({ navigation, route }) => {
                                     width: 40, height: 40
                                 }} />
                             </TouchableOpacity>
-                            : renderProduct()
+                            : null
                         }
-
-                        {!isLoading && productList != '' ? renderButton() : null}
-
 
                     </ScrollView>
 
@@ -619,4 +686,4 @@ const ViewProduct = ({ navigation, route }) => {
     )
 }
 
-export default ViewProduct;
+export default ViewCustomer;

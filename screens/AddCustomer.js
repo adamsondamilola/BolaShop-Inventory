@@ -18,17 +18,15 @@ import { COLORS, SIZES, FONTS, icons, images } from "../constants"
 import { STYLES } from "../constants/theme";
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import dateTime from "../constants/dateTime";
 
-const AddProduct = ({ navigation, route }) => {
+const AddCustomer = ({ navigation, route }) => {
 
-    const [modalVisible, setModalVisible] = React.useState(false)
-
+    const [modalVisible, setModalVisible] = React.useState(false);
     const [errMsg, setErrMsg] = React.useState(null);
     const [isLoading, setIsLoading] = useState(false);
 
     const [shopName, setShopName] = useState(null);
-    const [currencySymbol, setCurrencySymbol] = useState(null);
-    const [shopSettings, setShopSettings] = useState([])
 
     const [visible, setVisible] = React.useState(false);
 
@@ -36,84 +34,29 @@ const AddProduct = ({ navigation, route }) => {
 
     const closeMenu = () => setVisible(false);
 
-    const [newlyScanned, setNewlyScanned] = useState(route.params.scannedcode)
-    const [productName, setProductName] = useState(null)
-    const [productQuantity, setProductQuantity] = useState(null)
-    const [productAmount, setProductAmount] = useState(null)
-    const [productSelling, setProductSelling] = useState(null)
-    const [productExpiryYear, setProductExpiryYear] = useState(null)
-    const [productExpiryMonth, setProductExpiryMonth] = useState(null)
+    const [name, setName] = useState(null)
+    const [phone, setPhone] = useState(null)
+    const [email, setEmail] = useState(null)
+    const [address, setAddress] = useState(null)
     const [id, setId] = useState(1)
 
-    var today = new Date();
-    var dateNow = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+    var dateNow = dateTime.todayDate;
 
-    const [ifExists, setIfExists] = useState(false)
-
-    let productList = [{
+    let customersList = [{
         "id": id,
-        "productCode": newlyScanned,
-        "productName": productName,
-        "productQuantity": productQuantity,
-        "productAmount": productAmount,
-        "productSelling": productSelling,
-        "dateAdded": dateNow,
-        "expiryDate": { "month": productExpiryMonth, "year": productExpiryYear }
+        "name": name,
+        "phone": phone,
+        "email": email,
+        "address": address,
+        "dateAdded": dateNow
     }];
 
-
-
-    const checkIfCodeExists = async () => {
-        
-        var counter_ = 0
-        try {
-            setIsLoading(true)
-            var prods = await AsyncStorage.getItem('productList');
-            if (prods) {
-                var y = JSON.parse(prods)
-
-                for (let i = 0; i < y.length; i++) {
-                    if (y[i].productCode === newlyScanned) counter_++;
-                }
-
-                if (counter_ > 0) {
-                    
-                    for (let x of y) {
-                        if (x.productCode == newlyScanned) {
-
-                            await AsyncStorage.setItem('pageNumber', JSON.stringify(x.id));
-
-                                navigation.reset({
-                                    index: 0,
-                                    routes: [{ name: 'ViewProduct', params: { lastroute: 'Dashboard' } }],
-                                })
-
-
-                            setIsLoading(false)
-
-                        }
-                    }
-                    setIfExists(true)
-                }
-
-
-            }
-            setIsLoading(false)
-        } catch (e) {
-            setIsLoading(false)
-            setModalVisible(true)
-        }
-
-    }
-
-
+    
     const resetFields = () => {
-        setProductQuantity(null)
-        setProductSelling(null)
-        setProductName(null)
-        setProductAmount(null)
-        setProductExpiryMonth(null)
-        setProductExpiryYear(null)
+        setName(null)
+        setPhone(null)
+        setEmail(null)
+        setAddress(null)
     }
 
     
@@ -132,11 +75,7 @@ const AddProduct = ({ navigation, route }) => {
     }
 
 
-    useEffect(() => {
-
-            checkIfCodeExists()
-
-    }, [])
+ 
 
     useEffect(() => {
         getSettings();
@@ -144,52 +83,28 @@ const AddProduct = ({ navigation, route }) => {
     }, [])
 
     const saved = () => {
-        setIsLoading(false)
+        resetFields();
+        setIsLoading(false);
         navigation.reset({
             index: 0,
-            routes: [{ name: 'Dashboard' }],
-        })
+            routes: [{ name: 'Customers' }],
+        });
     }
 
-
-
     const addAction = async () => {
-        let counter_ = 0;
-        try {
-            setIsLoading(true)
-            var prods = await AsyncStorage.getItem('productList');
-            if (prods) {
-                var y = JSON.parse(prods)
-            
-            for (let i = 0; i < y.length; i++) {
-                if ((y[i].productName).trim().toLowerCase() === productName.trim().toLowerCase()) counter_++;
-                }
-                
-                
-            }
-            setIsLoading(false)
-        } catch (e) {
-            setIsLoading(false)
-        }
-        
-//        setIsLoading(false)
 
-        if (!productQuantity) setErrMsg("Enter Quantity.");
-        else if (!productSelling) setErrMsg("Enter Selling Price.");
-        else if (!productName) setErrMsg("Enter Name of Product.");
-        else if (!productAmount) setErrMsg("Enter Product Amount.");
-        else if (parseInt(productSelling) < parseInt(productAmount)) setErrMsg("Sorry, selling price can not be less than amount purchased");
-        else if (counter_ > 0) {
-            setErrMsg("Product Name Already Exists. Use a different name")
-        }
+        if (!name) setErrMsg("Enter name.");
+        else if (!phone) setErrMsg("Enter phone number.");
+        else if (phone.length > 25) setErrMsg("Phone number too long.");
+        else if (isNaN(phone) === true) setErrMsg("Phone number should be numbers.");
 
         else {
             setErrMsg(null)
 
             try {
-            //  await AsyncStorage.removeItem('productList')
+
                 setIsLoading(true)
-                var pitems = await AsyncStorage.getItem('productList');
+                var pitems = await AsyncStorage.getItem('customersList');
                 if (pitems) {
 
                     var x = JSON.parse(pitems)
@@ -201,50 +116,49 @@ const AddProduct = ({ navigation, route }) => {
                     let row = counter - 1
                     let lastId = x[row].id
                     let newId = lastId + 1
-
                     
 
                     if (newId > lastId) {
 
-                        let productList_ = {
+                        let customersList_ = {
                             "id": newId,
-                            "productCode": newlyScanned,
-                            "productName": productName,
-                            "productQuantity": productQuantity,
-                            "productAmount": productAmount,
-                            "productSelling": productSelling,
-                            "dateAdded": dateNow,
-                            "expiryDate": { "month": productExpiryMonth, "year": productExpiryYear }
+                            "name": name,
+                            "phone": phone,
+                            "email": email,
+                            "address": address,
+                            "dateAdded": dateNow
                         };
 
-                        x.push(productList_) //Add new list to old list in local storage
+                        var result = x.filter(w => (w.phone) === phone);
 
-                        await AsyncStorage.setItem("productList", JSON.stringify(x)) //JSON.stringify converts JS object to JSON
+                        if(result.length > 0){
+                            setErrMsg("Phone number already exists.")
+                        }else{
+                            x.push(customersList_) //Add new list to old list in local storage
+                            await AsyncStorage.setItem("customersList", JSON.stringify(x)) //JSON.stringify converts JS object to JSON    
+                            saved()
+                        }
 
-                        saved()
+                        
 
                     }
 
                     setIsLoading(false)
                     
                 } else {
-                    await AsyncStorage.setItem('productList', JSON.stringify(productList));
+                    await AsyncStorage.setItem('customersList', JSON.stringify(customersList));
                     saved()
                 }
              
-                const items_ = await AsyncStorage.getItem('productList');
-                if (items_ !== null)
-                    console.log(JSON.parse(items_));
-
+               
                 
             } catch (e) {
-                await AsyncStorage.setItem('productList', JSON.stringify(productList));
+                await AsyncStorage.setItem('customersList', JSON.stringify(customersList));
                     saved()
                 console.log(e)
                 setErrMsg(null)                
                 setIsLoading(false)
-            }
-            
+            }            
 
         }
 
@@ -256,13 +170,8 @@ const AddProduct = ({ navigation, route }) => {
     function renderHeader() {
         return (
             <TouchableOpacity
-                style={{
-                    flexDirection: 'row',
-                    alignItems: "center",
-                    marginTop: SIZES.padding * 6,
-                    paddingHorizontal: SIZES.padding * 2
-                }}
-                onPress={() => navigation.goBack()}
+                style={STYLES.headerTitleView}
+                onPress={() =>  navigation.navigate('Expenses')}
             >
                 <Image
                     source={icons.back}
@@ -274,7 +183,7 @@ const AddProduct = ({ navigation, route }) => {
                     }}
                 />
 
-                <Text style={{ marginLeft: SIZES.padding * 1.5, color: COLORS.white, ...FONTS.h4 }}>Add Product</Text>
+                <Text style={{ marginLeft: SIZES.padding * 1.5, color: COLORS.white, ...FONTS.h4 }}>Add Expenses</Text>
             </TouchableOpacity>
         )
     }
@@ -312,9 +221,10 @@ const AddProduct = ({ navigation, route }) => {
                 <View style={{ marginTop: SIZES.padding * 3 }}>
                     <TextInput
                         returnKeyType="next"
-                        value={productName}
-                        onChangeText={text => setProductName(text)}
-                        label='Product Name'
+                        value={name}
+                        maxLength={50}
+                        onChangeText={text => setName(text)}
+                        label='Full Name'
                         mode='outlined'
                         theme={STYLES.textInput}
                     />
@@ -324,9 +234,9 @@ const AddProduct = ({ navigation, route }) => {
                     <TextInput
                         returnKeyType="next"
                         keyboardType="number-pad"
-                        value={productAmount}
-                        onChangeText={text => setProductAmount(text)}
-                        label='Product Amount'
+                        value={phone}
+                        onChangeText={text => setPhone(text)}
+                        label='Phone Number'
                         mode='outlined'
                         theme={STYLES.textInput}
                     />
@@ -335,10 +245,10 @@ const AddProduct = ({ navigation, route }) => {
                 <View style={{ marginTop: SIZES.padding * 3 }}>
                     <TextInput
                         returnKeyType="next"
-                        keyboardType="numeric"
-                        value={productSelling}
-                        onChangeText={text => setProductSelling(text)}
-                        label='Selling Price'
+                        keyboardType="email-address"
+                        value={email}
+                        onChangeText={text => setEmail(text)}
+                        label='Email (Optional)'
                         mode='outlined'
                         theme={STYLES.textInput}
                     />
@@ -347,39 +257,10 @@ const AddProduct = ({ navigation, route }) => {
                 <View style={{ marginTop: SIZES.padding * 3 }}>
                     <TextInput
                         returnKeyType="next"
-                        keyboardType="numeric"
-                        value={productExpiryMonth}
-                        onChangeText={text => setProductExpiryMonth(text)}
-                        label='Expiry Month'
-                        mode='outlined'
-                        maxLength={2}
-                        theme={STYLES.textInput}
-                    />
-
-                    <TextInput
-                        returnKeyType="next"
-                        keyboardType="numeric"
-                        value={productExpiryYear}
-                        onChangeText={text => setProductExpiryYear(text)}
-                        label='Expiry Year'
-                        mode='outlined'
-                        mask="YYYY"
-                        maxLength={4}
-                        theme={STYLES.textInput}
-                    />
-
-          
-
-                </View>
-
-                <View style={{ marginTop: SIZES.padding * 3 }}>
-                    <TextInput
-                        keyboardType='default'
-                        returnKeyType='done'
-                        keyboardType="numeric"
-                        value={productQuantity}
-                        onChangeText={text => setProductQuantity(text)}
-                        label='In Stock'
+                        keyboardType="default"
+                        value={address}
+                        onChangeText={text => setAddress(text)}
+                        label='Address (Optional)'
                         mode='outlined'
                         theme={STYLES.textInput}
                     />
@@ -418,9 +299,9 @@ const AddProduct = ({ navigation, route }) => {
                         style={STYLES.signUpPage}
                     >
                         <Text style={{
-                            color: '#ff4000',
+                            color: COLORS.secondary,
                             fontWeight: 'bold'
-                        }}>Add New</Text>
+                        }}>Add Customer</Text>
                     </LinearGradient>
 
                 </TouchableOpacity>
@@ -494,7 +375,6 @@ const AddProduct = ({ navigation, route }) => {
                 <View>
 
                     {renderHeader()}
-                    {renderLogo()}
 
 
                 </View>
@@ -514,4 +394,4 @@ const AddProduct = ({ navigation, route }) => {
     )
 }
 
-export default AddProduct;
+export default AddCustomer;

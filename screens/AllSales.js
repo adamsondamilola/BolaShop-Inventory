@@ -220,26 +220,25 @@ const AllSales = ({ navigation }) => {
                 let total_items = 0
 
                 for (let y of x) {
-                    if (parseInt(y.total_amount) > 0) {
-                        total_amount += parseInt(y.total_amount)
+                    if (parseFloat(y.total_amount) > 0) {
+                        total_amount += parseFloat(y.total_amount)
                         setTotalAmount(total_amount)
 
                     }
-                    if (parseInt(y.total_selling_amount) > 0) {
-                        total_selling_amount += parseInt(y.total_selling_amount)
-                        setTotalSellingAmount(total_selling_amount)
-                        
+                    if (parseFloat(y.total_selling_amount) > 0) {
+                        total_selling_amount += parseFloat(y.total_selling_amount)
+                        setTotalSellingAmount(total_selling_amount)                        
 
                     }
 
-                    if (parseInt(y.items) > 0) {
-                        total_items += parseInt(y.items)
+                    if (parseFloat(y.items) > 0) {
+                        total_items += parseFloat(y.items)
                         setTotalItems(total_items)
 
                     }
 
-                    if (parseInt(y.profit) > 0) {
-                        profit += parseInt(y.profit)
+                    if (parseFloat(y.profit) > 0) {
+                        profit += parseFloat(y.profit)
                         setTotalProfit(profit)
                     }
 
@@ -269,7 +268,7 @@ const AllSales = ({ navigation }) => {
 
         setIsLoading(true)
 
-        if (parseInt(id) < 1) {
+        if (parseFloat(id) < 1) {
             setErrMsg("Id can not be less than 1")
             setModalVisible(true)
     }
@@ -286,7 +285,7 @@ const AllSales = ({ navigation }) => {
 
                 pitems = JSON.parse(pitems)
 
-                const result = pitems.filter(w => w.id === parseInt(id))
+                const result = pitems.filter(w => w.id === parseFloat(id))
                 //setProductList(result)
 
                 var x = result
@@ -306,22 +305,22 @@ const AllSales = ({ navigation }) => {
 
                 for (let y of x) {
 
-                    if (y.id === parseInt(id)) {
+                    if (y.id === parseFloat(id)) {
                         
-                        if (parseInt(y.total_amount) > 0) {
-                            total_amount += parseInt(y.total_amount)
+                        if (parseFloat(y.total_amount) > 0) {
+                            total_amount += parseFloat(y.total_amount)
                             setTotalAmount(total_amount)
 
                         }
-                        if (parseInt(y.total_selling_amount) > 0) {
-                            total_selling_amount += parseInt(y.total_selling_amount)
+                        if (parseFloat(y.total_selling_amount) > 0) {
+                            total_selling_amount += parseFloat(y.total_selling_amount)
                             setTotalSellingAmount(total_selling_amount)
 
 
                         }
 
-                        if (parseInt(y.items) > 0) {
-                            total_items += parseInt(y.items)
+                        if (parseFloat(y.items) > 0) {
+                            total_items += parseFloat(y.items)
                             setTotalItems(total_items)
 
                         }
@@ -363,11 +362,11 @@ const AllSales = ({ navigation }) => {
             setErrMsg("Enter a valid year")
             setModalVisible(true)
         }
-        else if (month && parseInt(month) < 1 || month && parseInt(month) > 12) {
+        else if (month && parseFloat(month) < 1 || month && parseFloat(month) > 12) {
             setErrMsg("Enter a valid month.")
             setModalVisible(true)
         }
-        //else if (month && parseInt(month) < 10 && month.substring(0, 1).toLowerCase() != "0") setErrMsg("Invalid month. Month lower than 10 (October) should start with 0. E.g 03 stands for March")
+        //else if (month && parseFloat(month) < 10 && month.substring(0, 1).toLowerCase() != "0") setErrMsg("Invalid month. Month lower than 10 (October) should start with 0. E.g 03 stands for March")
         else if (month && isNaN(month) === true) {
             setErrMsg("Month should be a number")
         setModalVisible(true)
@@ -380,7 +379,7 @@ const AllSales = ({ navigation }) => {
             setErrMsg("Day should be a number")
             setModalVisible(true)
         }
-        else if (day && parseInt(day) < 1 || day && parseInt(day) > 31) {
+        else if (day && parseFloat(day) < 1 || day && parseFloat(day) > 31) {
             setErrMsg("Enter a valid day. Minimum is 1 and maximum is 31")
             setModalVisible(true)
         }
@@ -389,54 +388,54 @@ const AllSales = ({ navigation }) => {
             setErrMsg(null)
             setModalVisible(false)
 
-            if (parseInt(month) === 1) {
+            if (parseFloat(month) === 1) {
                 month = "Jan"
             }
-            else if (parseInt(month) === 2) {
+            else if (parseFloat(month) === 2) {
                 month = "Feb"
             }
 
-            else if (parseInt(month) === 3) {
+            else if (parseFloat(month) === 3) {
                 month = "Mar"
             }
 
-            else if (parseInt(month) === 4) {
+            else if (parseFloat(month) === 4) {
                 month = "Apr"
             }
 
-            else if (parseInt(month) === 5) {
+            else if (parseFloat(month) === 5) {
                 month = "May"
             }
 
-            else if (parseInt(month) === 6) {
+            else if (parseFloat(month) === 6) {
                 month = "Jun"
             }
 
-            else if (parseInt(month) === 7) {
+            else if (parseFloat(month) === 7) {
                 month = "Jul"
             }
 
-            else if (parseInt(month) === 8) {
+            else if (parseFloat(month) === 8) {
                 month = "Aug"
             }
 
 
-            else if (parseInt(month) === 9) {
+            else if (parseFloat(month) === 9) {
                 month = "Sep"
             }
 
 
-            else if (parseInt(month) === 10) {
+            else if (parseFloat(month) === 10) {
                 month = "Oct"
             }
 
 
-            else if (parseInt(month) === 11) {
+            else if (parseFloat(month) === 11) {
                 month = "Nov"
             }
 
 
-            else if (parseInt(month) === 12) {
+            else if (parseFloat(month) === 12) {
                 month = "Dec"
             }
 
@@ -487,20 +486,20 @@ const AllSales = ({ navigation }) => {
                     for (let yy of x) {
 
 
-                            if (parseInt(yy.total_amount) > 0) {
-                                total_amount += parseInt(yy.total_amount)
+                            if (parseFloat(yy.total_amount) > 0) {
+                                total_amount += parseFloat(yy.total_amount)
                                 setTotalAmount(total_amount)
 
                             }
-                            if (parseInt(yy.total_selling_amount) > 0) {
-                                total_selling_amount += parseInt(yy.total_selling_amount)
+                            if (parseFloat(yy.total_selling_amount) > 0) {
+                                total_selling_amount += parseFloat(yy.total_selling_amount)
                                 setTotalSellingAmount(total_selling_amount)
 
 
                             }
 
-                            if (parseInt(yy.items) > 0) {
-                                total_items += parseInt(yy.items)
+                            if (parseFloat(yy.items) > 0) {
+                                total_items += parseFloat(yy.items)
                                 setTotalItems(total_items)
 
                             }

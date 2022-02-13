@@ -310,7 +310,7 @@ const Calculator = ({ route, navigation }) => {
                     justifyContent: 'center'
                 }}
             >
-                <Text style={{ textAlign: 'center', color: COLORS.white, fontSize: 35 }}> = {number_format.number_format(result)}</Text>
+                <Text style={{ textAlign: 'center', color: COLORS.white, fontSize: 35 }}> = {number_format(result)}</Text>
 
             </View>
         )

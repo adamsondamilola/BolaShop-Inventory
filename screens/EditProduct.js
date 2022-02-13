@@ -61,60 +61,7 @@ const EditProduct = ({ route, navigation }) => {
 
     const [pageNumber, setPageNumber] = useState(productId);
 
-
-    //let productData = [{
-    //    "id": 1,
-    //    "productCode": "1013195800001",
-    //    "productName": "Ascobitone Vitamin C Syrup",
-    //    "productQuantity": "12",
-    //    "productAmount": "200",
-    //    "productSelling": "230",
-    //    "dateAdded": "2021-09-09",
-    //    "expiryDate": { "month": "02", "year": "2022" }
-    //},
-    //{
-    //    "id": 2,
-    //    "productCode": "1013195800002",
-    //    "productName": "Product Name 2",
-    //    "productQuantity": "12",
-    //    "productAmount": "400",
-    //    "productSelling": "430",
-    //    "dateAdded": "2021-09-09",
-    //    "expiryDate": { "month": "09", "year": "2021" }
-    //},
-    //{
-    //    "id": 3,
-    //    "productCode": "1013195800003",
-    //    "productName": "Product Name 3",
-    //    "productQuantity": "10",
-    //    "productAmount": "1000",
-    //    "productSelling": "500",
-    //    "dateAdded": "2021-09-09",
-    //    "expiryDate": { "month": "01", "year": "2021" }
-    //},
-    //{
-    //    "id": 4,
-    //    "productCode": "1013195800004",
-    //    "productName": "Product Name 4",
-    //    "productQuantity": "10",
-    //    "productAmount": "1000",
-    //    "productSelling": "1200",
-    //    "dateAdded": "2021-09-09",
-    //    "expiryDate": { "month": "11", "year": "2021" }
-    //},
-    //{
-    //    "id": 5,
-    //    "productCode": "8906096001438",
-    //    "productName": "Product Name 5",
-    //    "productQuantity": "10",
-    //    "productAmount": "1000",
-    //    "productSelling": "1200",
-    //    "dateAdded": "2021-09-09",
-    //    "expiryDate": { "month": "11", "year": "2021" }
-    //}
-
-    //];
-
+    
     const [productData, setProductData] = useState([])
 
 

@@ -196,10 +196,10 @@ export const STYLES = {
         alignItems: 'center',
         borderRadius: 10,
         flexDirection: 'row',
-        color: '#fff',
+        color: COLORS.secondary,
         fontSize: 20,
         fontWeight: 'bold',
-        borderColor: '#ff4000',
+        borderColor: COLORS.secondary,
         borderWidth: 2,
     },
     defaultButton: {
@@ -299,6 +299,16 @@ export const STYLES = {
         alignItems: 'center',
         alignContent: 'center'
     },
+    alignRight: {
+        flexDirection: 'row', 
+        alignItems: 'flex-end', 
+        justifyContent: 'flex-end'
+    },
+    alignLeft: {
+        flexDirection: 'row', 
+        alignItems: 'flex-start', 
+        justifyContent: 'flex-start'
+    },
     qrcode_style: {
         centerText: {
             flex: 1,
@@ -317,6 +327,13 @@ export const STYLES = {
         buttonTouchable: {
             padding: 16
         }
+    },
+    headerTitleView: {
+        flexDirection: 'row',
+        alignItems: "center",
+        marginTop: SIZES.padding * 6,
+        marginBottom: 10,
+        paddingHorizontal: SIZES.padding * 2
     }
 
 };

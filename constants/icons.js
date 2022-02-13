@@ -15,6 +15,7 @@ const reload = require("../assets/icons/reload.png");
 const scan = require("../assets/icons/scan.png");
 const send = require("../assets/icons/send.png");
 const user = require("../assets/icons/user.png");
+const users = require("../assets/icons/users.png");
 const wallet = require("../assets/icons/wallet.png");
 const mark = require("../assets/icons/mark.png");
 const check = require("../assets/icons/check.png");
@@ -45,6 +46,10 @@ const shop = require("../assets/icons/shop.png");
 const stockout = require("../assets/icons/stockout.png");
 const piechart = require("../assets/icons/piechart.png");
 const share = require("../assets/icons/share.png");
+const debt = require("../assets/icons/debt.png");
+const expenses = require("../assets/icons/expenses.png");
+const summary = require("../assets/icons/statement.png");
+
 
 export default {
     back,
@@ -64,6 +69,7 @@ export default {
     scan,
     send,
     user,
+    users,
     wallet,
     mark,
     check,
@@ -93,5 +99,8 @@ export default {
     shop,
     stockout,
     piechart,
-    share
+    share,
+    debt,
+    expenses,
+    summary,
 }

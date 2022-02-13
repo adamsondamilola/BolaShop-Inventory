@@ -20,7 +20,7 @@ export default {
     logo,
     loader,
     ads,
-
+    
     // Dummy
     usFlag
 }

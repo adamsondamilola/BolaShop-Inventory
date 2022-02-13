@@ -167,7 +167,7 @@ const TodaysSales = ({ navigation }) => {
 
     const searchByYearMonthDay = async (year, month, day) => {
 
-        setIsLoading(true)
+        //setIsLoading(true)
 
         setErrMsg(null)
         setModalVisible(false)

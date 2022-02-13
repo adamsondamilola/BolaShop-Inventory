@@ -141,12 +141,7 @@ const AllProducts = ({ navigation }) => {
         return (
             <View>
             <TouchableOpacity
-                style={{
-                    flexDirection: 'row',
-                    alignItems: "center",
-                    marginTop: SIZES.padding * 6,
-                    paddingHorizontal: SIZES.padding * 2
-                }}
+                style={STYLES.headerTitleView}
                 onPress={() => navigation.reset({
                     index: 0,
                     routes: [{ name: 'Dashboard' }],
@@ -384,64 +379,55 @@ const AllProducts = ({ navigation }) => {
 
         const renderItem = ({ item }) => (
             <View
-                style={{ marginBottom: SIZES.padding * 3, alignItems: 'flex-start', marginTop: 3 }}
-                
-            >
-                <View
-                    style={{
-                        height: 70,
-                        width: '100%',
-                        marginBottom: 5,
-                        borderRadius: 20,
-                        justifyContent: 'center',
-                        backgroundColor: COLORS.lightGray
-                    }}
-                >
-
-                    <Text style={{ textAlign: 'center', flexWrap: 'wrap', fontSize: 18, color: COLORS.black }}>
-                        {item.productName}</Text>
-                    <Text style={{ textAlign: 'center', flexWrap: 'wrap', fontSize: 13, color: COLORS.black }}> In Stock: {item.productQuantity} {item.expiryDate && item.expiryDate.month !== null ? (", Expires :" + item.expiryDate.month + "-" + item.expiryDate.year) : null}</Text>
-
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <TouchableOpacity
-                            onPress={() => actionsButton(item.id)}
-                        >
-                        <Image
-                            source={icons.product}
-                            style={{ width: 40, height: 40, tintColor: COLORS.emerald }}
-                            
-                            />
-                        </TouchableOpacity>
-                        <View style={{ flex: 1, height: 1, backgroundColor: COLORS.emerald }} />
-                        <View>
-                            <Text style={{ width: 120, textAlign: 'center', fontSize: 18, color: COLORS.secondary }}> {number_format(item.productSelling)} {currencySymbol} </Text>
-                        </View>
-                        <View style={{ flex: 1, height: 1, backgroundColor: COLORS.emerald }} />
-                        <TouchableOpacity
-                            onPress={() => navigation.reset({
-                                index: 0,
-                                routes: [{
-                                    name: 'AddSale',
-                                    params: {
-                                        scanned: true,
-                                        scannedcode: item.productCode,
-                                    }
-                                }],
-                            })}
-                        >
-                        <Image
-                            source={icons.plus}
-                            style={{ width: 40, height: 40, tintColor: COLORS.emerald }}
-                            />
-                        </TouchableOpacity>
-                    </View>
-
-
-                </View>
-
-
-            </View>
-        )
+  style={{ marginBottom: 2, alignItems: 'flex-start', marginTop: 3 }}                
+  >
+  <View
+      style={{
+          height: 70,
+          width: '100%',
+          marginBottom: 5,
+          borderRadius: 10,
+          justifyContent: 'center',
+          backgroundColor: COLORS.lightGray
+      }}
+  >
+  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <Text style={{flex: 1, fontSize: 18, fontWeight: 'bold', color: COLORS.black }}>
+      {item.productName}</Text>
+      <Text style={{textAlign: 'center', fontSize: 18, color: COLORS.secondary }}> {number_format(item.productSelling)} {currencySymbol} </Text>                    
+          </View>
+  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <Text style={{ flex: 1, color: COLORS.black }} >In Stock: {item.productQuantity}{"\n"}{item.expiryDate.month !== null ? ("#Exp :"+ item.expiryDate.month  +"-"+ item.expiryDate.year ) : null }</Text>
+      <TouchableOpacity
+  style={{backgroundColor: COLORS.secondary, color: COLORS.white,borderRadius: 5, width: 50, height: 20,
+  alignItems: 'center', marginRight: 6}}
+  onPress={() => actionsButton(item.id)}>
+  <Text style={{ flex: 1, color: COLORS.white }} >Details </Text>
+  
+  </TouchableOpacity>
+  
+  <TouchableOpacity
+  style={{backgroundColor: COLORS.secondary, color: COLORS.white,borderRadius: 5, height: 20,
+  alignItems: 'center', marginRight: 6}}
+  onPress={() => navigation.reset({
+    index: 0,
+    routes: [{
+        name: 'AddSale',
+        params: {
+            scanned: true,
+            scannedcode: item.productCode,
+        }
+    }],
+})}>
+  <Text style={{ flex: 1, color: COLORS.white }} >Add to Cart </Text>
+  
+  </TouchableOpacity>
+      </View>
+  </View>
+  
+  
+  </View>
+          )
 
         return (
             <FlatList
@@ -516,7 +502,6 @@ const AllProducts = ({ navigation }) => {
                 <View>
 
                     {renderHeader()}
-                    {renderLogo()}
 
                 </View>
 

@@ -19,15 +19,15 @@ import { COLORS, SIZES, FONTS, icons, images } from "../constants"
 import { STYLES } from "../constants/theme";
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import SettingsModule from "./SettingsModule";
-import { Constants } from "expo-barcode-scanner";
+import dateToString from "../constants/dateToString";
 
-const ViewProduct = ({ navigation, route }) => {
+const ViewExpenses = ({ navigation, route }) => {
 
     const [lastRoute, setLastRoute] = React.useState(route.params.lastroute)
     const [modalVisible, setModalVisible] = React.useState(false)
 
     const [delete_, setDelete_] = React.useState(false)
+    const [update, setUpdate] = React.useState(false)
 
     let errMessage = null;
     const [errMsg, setErrMsg] = React.useState(null);
@@ -38,11 +38,15 @@ const ViewProduct = ({ navigation, route }) => {
 
     const [isLoading, setIsLoading] = useState(false);
 
-    const title = "Product Details"
+    const [title_, setTitle_] = useState(null)
+    const [amount, setAmount] = useState(null)
+    const [note, setNote] = useState(null)
+
+    const title = "Expenses Details"
 
     const [pageNumber, setPageNumber] = useState(null);
 
-    
+   
 
     const getSettings = () => {
         try {
@@ -66,9 +70,9 @@ const ViewProduct = ({ navigation, route }) => {
     }
 
 
-    const [productData, setProductData] = useState([])
+    const [expensesData, setProductData] = useState([])
 
-    const [productList, setProductList] = useState([])
+    const [expensesList, setExpensestList] = useState([])
 
     const getProductDetails = async () => {
 
@@ -76,7 +80,7 @@ const ViewProduct = ({ navigation, route }) => {
 
         try {
 
-            var pitems = await AsyncStorage.getItem('productList');
+            var pitems = await AsyncStorage.getItem('expensesList');
             if (pitems) {
 
                 var x = JSON.parse(pitems)
@@ -84,12 +88,10 @@ const ViewProduct = ({ navigation, route }) => {
 
             }
 
-
         } catch (e) {
             console.log(e)
             setErrMsg(null)
         }
-
 
         try {
 
@@ -99,14 +101,13 @@ const ViewProduct = ({ navigation, route }) => {
                 if (jsonresult != null) {
                     setPageNumber(jsonresult)
 
-                    for (let x of productData) {
+                    for (let x of expensesData) {
                         if (x.id == pageNumber) {
 
-                            setProductList(x)
+                            setExpensestList(x)
 
                         }
                     }
-
 
                 }
             });
@@ -125,10 +126,10 @@ const ViewProduct = ({ navigation, route }) => {
     useEffect(() => {
 
         if (lastRoute === null || lastRoute === '') {
-            setLastRoute('AllProducts')
+            setLastRoute('Expenses')
         }
 
-        if (productList.length === 0) {
+        if (expensesList.length === 0) {
 
             getSettings()
 
@@ -140,25 +141,11 @@ const ViewProduct = ({ navigation, route }) => {
 
 
     function toEditPage() {
-
-        let productList_ = {
-            "id": productList.id,
-            "productCode": productList.productCode,
-            "productName": productList.productName,
-            "productQuantity": productList.productQuantity,
-            "productAmount": productList.productAmount,
-            "productSelling": productList.productSelling,
-            "dateAdded": productList.dateAdded,
-            "expiryDate": { "month": productList.expiryDate.month, "year": productList.expiryDate.year }
-        };
-
-        navigation.reset({
-            index: 0,
-            routes: [{ name: 'EditProduct', params: productList_ }],
-        });
-
+        setTitle_(expensesList.title)
+    setAmount(expensesList.amount)
+    setNote(expensesList.note)
+    setUpdate(true)
     }
-
 
     function renderHeader() {
         return (
@@ -220,13 +207,13 @@ const ViewProduct = ({ navigation, route }) => {
         setDelete_(false)
         setModalVisible(false)
         try {
-            let data = productData
+            let data = expensesData
             var updated = data.filter(item => item.id !== parseInt(pageNumber))
             let newupdate = updated
 
-            await AsyncStorage.setItem('productList', JSON.stringify(newupdate));
+            await AsyncStorage.setItem('expensesList', JSON.stringify(newupdate));
 
-            setSuccessMsg("Product Deleted!")
+            setSuccessMsg("Expense Deleted!")
 
             //alert(successMsg)
             navigation.reset({
@@ -246,12 +233,12 @@ const ViewProduct = ({ navigation, route }) => {
     function renderProduct() {
 
         return (
-            <TouchableOpacity
+            <View
                 style={{ marginBottom: SIZES.padding * 3, alignItems: 'center', marginTop: 3 }}
             >
                 <View
                     style={{
-                        height: 250,
+                        height: 200,
                         width: '100%',
                         marginBottom: 5,
                         borderRadius: 20,
@@ -261,19 +248,7 @@ const ViewProduct = ({ navigation, route }) => {
                 >
 
                     <Text style={{ textAlign: 'center', flexWrap: 'wrap', fontSize: 20, color: COLORS.black, marginBottom: 10 }}>
-                        {productList.productName}</Text>
-
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-                        <Image
-                            source={icons.quantity}
-                            style={{ width: 25, height: 25, tintColor: COLORS.tealGreen }}
-                        />
-                        <Text style={{ fontSize: 15 }}> In Stock: </Text>
-                        <View style={STYLES.alignRight}>
-                            <Text style={{ marginLeft: 17, fontSize: 18, color: COLORS.secondary }}> {productList.productQuantity} </Text>
-                        </View>
-
-                    </View>
+                        {expensesList.title}</Text>
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
 
@@ -281,10 +256,8 @@ const ViewProduct = ({ navigation, route }) => {
                             source={icons.product}
                             style={{ width: 30, height: 30, tintColor: COLORS.emerald }}
                         />
-                        <Text style={{ fontSize: 15 }}>Price:</Text>
-                        <View style={STYLES.alignRight}>
-                            <Text style={{ marginLeft: 38, fontSize: 18, color: COLORS.secondary }}> {number_format(productList.productSelling)} {currencySymbol} </Text>
-                        </View>
+                        <Text style={{ fontSize: 15 }}>Amount:</Text>
+                            <Text style={{ flex: 1, textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {number_format(expensesList.amount)} {currencySymbol} </Text>
 
                     </View>
 
@@ -294,26 +267,10 @@ const ViewProduct = ({ navigation, route }) => {
                             source={icons.product}
                             style={{ width: 30, height: 30, tintColor: COLORS.secondary }}
                         />
-                        <Text style={{ fontSize: 15 }}>Amount:</Text>
-                        <View style={STYLES.alignRight}>
-                            <Text style={{ marginLeft: 19, fontSize: 18, color: COLORS.secondary }}> {number_format(productList.productAmount)} {currencySymbol} </Text>
-                        </View>
+                        <Text style={{ fontSize: 15 }}>Note:</Text>
+                            <Text style={{ flex: 1, textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {expensesList.note}</Text>
 
                     </View>
-
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-
-                        <Image
-                            source={icons.expire}
-                            style={{ width: 30, height: 30, tintColor: COLORS.primary }}
-                        />
-                        <Text style={{ fontSize: 15 }}>Expires:</Text>
-                        <View style={STYLES.alignRight}>
-                            <Text style={{ marginLeft: 23, fontSize: 18, color: COLORS.secondary }}> {!productList.expiryDate ? null : productList.expiryDate.month}-{!productList.expiryDate ? null : productList.expiryDate.year} </Text>
-                        </View>
-
-                    </View>
-
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
                         <Image
@@ -321,18 +278,16 @@ const ViewProduct = ({ navigation, route }) => {
                             style={{ width: 25, height: 25, tintColor: COLORS.orange }}
                         />
                         <Text style={{ fontSize: 15 }}> Added:</Text>
-                        <View>
-                            <Text style={{ marginLeft: 30, fontSize: 18, color: COLORS.secondary }}> {productList.dateAdded} </Text>
-                        </View>
-
+                            <Text style={{  flex: 1, textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {dateToString(expensesList.dateAdded)} </Text>
                         
                     </View>
 
 
                 </View>
 
+                {!isLoading && expensesList != '' ? renderButton() : null}
 
-            </TouchableOpacity>
+            </View>
 
 
         )
@@ -343,43 +298,7 @@ const ViewProduct = ({ navigation, route }) => {
     function renderButton() {
         return (
 
-            <View style={{ marginBottom: 10, alignItems: 'center' }}>
-
-<View>
-
-                            <TouchableOpacity
-                                style={{
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    width: 300,
-                                }}
-                                onPress={() => navigation.reset({
-                                    index: 0,
-                                    routes: [{
-                                        name: 'AddSale',
-                                        params: {
-                                            scanned: true,
-                                            scannedcode: productList.productCode,
-                                        }
-                                    }],
-                                })}
-                            >
-                                <LinearGradient
-                                    colors={[COLORS.secondary, COLORS.secondary]}
-                                    style={STYLES.defaultButton}
-
-
-                                >
-                                    <Text style={{
-                                        color: '#fff',
-                                        fontWeight: 'bold'
-                                    }}>Add to Cart</Text>
-                                </LinearGradient>
-
-                            </TouchableOpacity>
-                        </View>
-
-                
+            <View style={{ marginBottom: 10, alignItems: 'center' }}>                
                 <View>
 
                     <TouchableOpacity
@@ -435,25 +354,142 @@ const ViewProduct = ({ navigation, route }) => {
         )
     }
 
-    function renderBody() {
+    function renderUpdateForm() {
+    
         return (
             <View
                 style={{
-                    marginTop: SIZES.padding * 0,
+                    marginTop: SIZES.padding * 3,
                     marginHorizontal: SIZES.padding * 3,
                 }}
             >
-                <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
-                    {renderFeatures()}
+                <View style={{ marginTop: SIZES.padding * 3 }}>
+                    <TextInput
+                        returnKeyType="next"
+                        value={title_}
+                        maxLength={50}
+                        onChangeText={text => setTitle_(text)}
+                        label='Expenses Title or Name'
+                        mode='outlined'
+                        theme={STYLES.textInput}
+                    />
+                </View>
 
-                </SafeAreaView>
+                <View style={{ marginTop: SIZES.padding * 3 }}>
+                    <TextInput
+                        returnKeyType="next"
+                        keyboardType="number-pad"
+                        value={amount}
+                        onChangeText={text => setAmount(text)}
+                        label='Amount'
+                        mode='outlined'
+                        theme={STYLES.textInput}
+                    />
+                </View>
 
+                <View style={{ marginTop: SIZES.padding * 3 }}>
+                    <TextInput
+                        returnKeyType="next"
+                        keyboardType="default"
+                        value={note}
+                        onChangeText={text => setNote(text)}
+                        label='Note (Optional)'
+                        mode='outlined'
+                        theme={STYLES.textInput}
+                    />
+                </View>
 
+                <View style={{ marginTop: SIZES.padding * 3 }}>
+                {isLoading ?
+                    <TouchableOpacity
+                        style={{
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}
+                    >
+                    <Image source={images.loader} style={{
+                            width: 40, height: 40
+                        }} />
+                    </TouchableOpacity> :
+                (
+                <TouchableOpacity
+                    style={{
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}
+                    onPress={() => updateAction()}
+                >
+                    <LinearGradient
+                        colors={["transparent", "transparent"]}
+                        style={STYLES.signUpPage}
+                    >
+                        <Text style={{
+                            color: COLORS.secondary,
+                            fontWeight: 'bold'
+                        }}>Update Details</Text>
+                    </LinearGradient>
+
+                </TouchableOpacity>
+                    )}
+</View>
             </View>
         )
     }
 
+    const updateAction = async () => {
+        if (!title_) setErrMsg("Enter title or item name.");
+        else if (!amount) setErrMsg("Enter amount.");
+        else if (parseInt(amount) < 1) setErrMsg("Enter a valid amount");
+        else{
+            updateExpenses();
+        }
+    }
 
+    const updateExpenses = async () => {
+        setIsLoading(true)
+        try {
+
+            var pitems = await AsyncStorage.getItem('expensesList');
+            if (pitems) {
+
+                var x = JSON.parse(pitems)
+                setProductData(x)
+
+            }
+
+
+        } catch (e) {
+            console.log(e)
+            setErrMsg(null)
+        }
+
+        //Find index of specific object using findIndex method.
+        if (expensesData !== '[]' && expensesData != '') {
+
+            setModalVisible(false)
+
+            var objIndex = expensesData.findIndex((obj => obj.id === parseInt(expensesList.id)));
+
+            //Update object's property.
+            expensesData[objIndex].title = title_
+            expensesData[objIndex].amount = amount
+            expensesData[objIndex].note = note
+
+            await AsyncStorage.setItem('expensesList', JSON.stringify(expensesData));
+
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'ViewExpenses', params: { lastroute: 'Expenses' } }],
+            })
+
+            setIsLoading(false)
+
+        }
+
+        setIsLoading(false)
+        setUpdate(false)
+    }
+    
     function renderAreaCodesModal() {
 
         return (
@@ -493,7 +529,7 @@ const ViewProduct = ({ navigation, route }) => {
                                 <View style={{ marginBottom: 10, alignItems: 'center' }}>
 
                                     <Text style={{ marginLeft: 30, textAlign: "center", marginTop: 30, marginRight: 30, fontSize: 15, color: COLORS.secondary }}>
-                                        Do you want to Delete {productList.productName}?
+                                        Do you want to Delete {expensesList.productName}?
                                 </Text>
 
                                     <View>
@@ -592,7 +628,9 @@ const ViewProduct = ({ navigation, route }) => {
                         style={{ marginBottom: 25, marginTop: 2 }}
                     >
 
-                        {productList == '' ?
+                        {!update? renderProduct() : renderUpdateForm() }
+                        
+                        {expensesList == '' ?
                             <TouchableOpacity
                                 style={{
                                     alignItems: 'center',
@@ -603,11 +641,8 @@ const ViewProduct = ({ navigation, route }) => {
                                     width: 40, height: 40
                                 }} />
                             </TouchableOpacity>
-                            : renderProduct()
+                            : null
                         }
-
-                        {!isLoading && productList != '' ? renderButton() : null}
-
 
                     </ScrollView>
 
@@ -619,4 +654,4 @@ const ViewProduct = ({ navigation, route }) => {
     )
 }
 
-export default ViewProduct;
+export default ViewExpenses;

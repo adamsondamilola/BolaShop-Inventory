@@ -421,11 +421,9 @@ const AddSale = ({ navigation, route }) => {
                                     "dateAdded": dateNow + ' ' + timeNow
                                 };
 
-                                var str = pitems
-                                str = str.replace("[", "") //eplace [
-                                str = str.replace("]", "") //eplace ]
-                                var newPitems = "[" + str + "," + JSON.stringify(productList_) + "]"
-                                await AsyncStorage.setItem('newSale', newPitems);
+                                x.push(productList_) //Add new list to old list in local storage
+
+                                await AsyncStorage.setItem("newSale", JSON.stringify(x)) //JSON.stringify converts JS object to JSON
 
                             }
                             setUnitAdded(true)
