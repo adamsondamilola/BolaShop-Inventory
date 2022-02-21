@@ -414,6 +414,7 @@ onPress={() => Linking.openURL("tel:"+item.phone)}>
                 <View
                     style={{
                         width: '100%',
+                        padding: 10,
                         borderRadius: 10,
                         justifyContent: 'center'
                     }}

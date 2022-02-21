@@ -138,7 +138,7 @@ const Calculator = ({ route, navigation }) => {
 
         const renderItem = ({ item }) => (
             <TouchableOpacity
-                style={{ width: 80, height: 80}}
+                style={{ width: 70, height: 70, margin: 2}}
                 onPress={() => actionsButton(item.num)}
             >
                 <View
@@ -355,8 +355,6 @@ const Calculator = ({ route, navigation }) => {
                                     borderBottomWidth: 0,
                                     shadowColor: '#000000',
                                     shadowOffset: { width: 40, height: 30 },
-                                    shadowOpacity: 1.5,
-                                    shadowRadius: 3,
                                     elevation: 3,
                                     marginTop: 10,
                                     marginBottom: 10

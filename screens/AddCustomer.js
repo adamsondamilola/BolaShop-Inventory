@@ -171,7 +171,7 @@ const AddCustomer = ({ navigation, route }) => {
         return (
             <TouchableOpacity
                 style={STYLES.headerTitleView}
-                onPress={() =>  navigation.navigate('Expenses')}
+                onPress={() =>  navigation.navigate('Customers')}
             >
                 <Image
                     source={icons.back}
@@ -183,7 +183,7 @@ const AddCustomer = ({ navigation, route }) => {
                     }}
                 />
 
-                <Text style={{ marginLeft: SIZES.padding * 1.5, color: COLORS.white, ...FONTS.h4 }}>Add Expenses</Text>
+                <Text style={{ marginLeft: SIZES.padding * 1.5, color: COLORS.white, ...FONTS.h4 }}>Add Customer</Text>
             </TouchableOpacity>
         )
     }

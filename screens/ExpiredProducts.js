@@ -10,8 +10,7 @@ import {
     KeyboardAvoidingView,
     ScrollView,
     SafeAreaView,
-    Platform,
-    Linking
+    Platform
 } from "react-native"
 import { LinearGradient } from 'expo-linear-gradient'
 import { TextInput } from 'react-native-paper';
@@ -20,29 +19,39 @@ import { COLORS, SIZES, FONTS, icons, images } from "../constants"
 import { STYLES } from "../constants/theme";
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import dateToString from "../constants/dateToString";
-import DatePicker from "react-native-datepicker";
-import dateTime from "../constants/dateTime";
+import SettingsModule from "./SettingsModule";
 
-const Customers = ({ navigation }) => {
+const ExpiredProducts = ({ navigation }) => {
 
-    const [customersData, setCustomersData] = useState([])
-    const [customersList, setCustomersList] = useState([])
+    const [effectCounter, setEffectCounter] = React.useState(0)
 
+    const [productData, setProductData] = useState([])
+    const [productList, setProductList] = useState([])
+    const [productListNextYear, setProductListNextYear] = useState([])
+    const [productListExpired, setProductListExpired] = useState([])
+
+
+    const [showPassword, setShowPassword] = React.useState(false)
+
+    const [areas, setAreas] = React.useState([])
+    const [selectedArea, setSelectedArea] = React.useState(null)
     const [modalVisible, setModalVisible] = React.useState(false)
 
     let errMessage = null;
     const [errMsg, setErrMsg] = React.useState(null);
-    
-    const [search, setSearch] = useState(null);
+
     const [shopName, setShopName] = useState(null);
     const [currencySymbol, setCurrencySymbol] = useState(null);
+    const [shopSettings, setShopSettings] = useState([])
 
-    const [fromDate, setFromDate] = useState(dateTime.todayDate)
-    const [toDate, setToDate] = useState(dateTime.todayDate);
-    const [totalCount, setTotalCount] = useState(0);
+    const [dataReceived, setDataReceived] = useState([])
+    const [search, setSearch] = useState(null);
+    const [searchOn, setSearchOn] = useState(false);
+    const [scanned, setScanned] = useState(null);
 
-    const [customersCount, setCustomersCount] = useState(0)
+    const [productsExpired, setProductsExpired] = useState(0)
+    const [productsCount, setProductsCount] = useState(0)
+    const [productsCountExpNextYr, setProductsCountExpNextYr] = useState(0)
 
     var today = new Date();
     var thisYear = today.getFullYear()
@@ -51,7 +60,7 @@ const Customers = ({ navigation }) => {
 
     const [isLoading, setIsLoading] = useState(false);
 
-    const title = "Customers"
+    const title = "Expired Products"
 
     const getSettings = () => {
         try {
@@ -69,10 +78,9 @@ const Customers = ({ navigation }) => {
     }
 
     useEffect(() => {
-      
+
         getSettings()
     }, [])
-
 
     const number_format = (x) => {
         if (x == '' || x == null) x = 0;
@@ -86,15 +94,27 @@ const Customers = ({ navigation }) => {
         return z;
     }
 
+    const month_diff_next = (x, y) => {
+        if (x === '' || x === null) x = 0;
+        if (y === '' || y === null) y = 0;
+        let z = (y + 12) - x;
+        return z;
+    }
+
+    
+
+
+
+
+
 
     function renderHeader() {
         return (
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <TouchableOpacity
                 style={STYLES.headerTitleView}
                 onPress={() => navigation.reset({
                     index: 0,
-                    routes: [{ name: 'Dashboard' }],
+                    routes: [{ name: 'ExpiringSoon' }],
                 })
                 }
             >
@@ -110,8 +130,6 @@ const Customers = ({ navigation }) => {
 
                 <Text style={{ marginLeft: SIZES.padding * 1.5, color: COLORS.white, ...FONTS.h4 }}>{title}</Text>
             </TouchableOpacity>
-            <Text style={{ flex: 1,marginTop: 50, marginLeft: SIZES.padding * 1.5, color: COLORS.white, ...FONTS.h2 }}>{number_format(customersCount)}</Text>
-            </View>
         )
     }
 
@@ -129,6 +147,7 @@ const Customers = ({ navigation }) => {
                     source={images.logo}
                     style={STYLES.logo}
                 />
+
             </View>
         )
     }
@@ -142,7 +161,7 @@ const Customers = ({ navigation }) => {
 
             navigation.reset({
                 index: 0,
-                routes: [{ name: 'ViewCustomer', params: { lastroute: 'Customers' } }],
+                routes: [{ name: 'ViewProduct', params: { lastroute: 'ExpiredProducts' } }],
             })
 
         } catch (error) {
@@ -150,32 +169,34 @@ const Customers = ({ navigation }) => {
             setIsLoading(false)
             setModalVisible(true)
         }
+
     }
 
-    const getCustomersData = async () => {
+    const getProductList = async () => {
 
         setIsLoading(true)
 
         try {
 
-            var pitems = await AsyncStorage.getItem('customersList');
-
+            var pitems = await AsyncStorage.getItem('productList');
             if (pitems) {
 
-                var x = JSON.parse(pitems)
+                var x = JSON.parse(pitems) 
 
-                setCustomersData(x)
+                setProductData(x)
 
                 let counter = 0
 
-                setCustomersList(x.sort((a, b) => b.id - a.id).slice(0, 100)) //Ascending order by quantity/i stock
-
+                        const result = x.filter(w => w.expiryDate.year === thisYear.toString())
+                        setProductList(result.sort((a, b) => b.expiryDate.month - a.expiryDate.month).slice(0, 100)) //descending order by id
+                        
                 for (let i = 0; i < x.length; i++) {
-                    if (x[i].id > 0) counter++;
+                    if (x[i].expiryDate.year === thisYear.toString()) counter++;
                 }
-                setCustomersCount(counter)
-                setIsLoading(false)
 
+                setProductsCount(counter)
+
+                setIsLoading(false)
             }
 
 
@@ -183,39 +204,37 @@ const Customers = ({ navigation }) => {
             console.log(e)
             setErrMsg(null)
             setIsLoading(false)
-
         }
-        setIsLoading(false);
         
     }
 
-    const filterCustomersList = async (text) => {
-        
-        setIsLoading(true)
-       
-        try {
-            
-            var pitems = await AsyncStorage.getItem('customersList');
 
+    const getProductList2 = async () => {
+
+        setIsLoading(true)
+
+        try {
+
+            var pitems = await AsyncStorage.getItem('productList');
             if (pitems) {
 
                 var x = JSON.parse(pitems)
-                setCustomersData(x)
-                if(isNaN(text) === true){
-                    var result = x.filter(w => (w.name).toLowerCase().includes(text.toLowerCase()) === true);
-                    if(result.length > 0){
-                    setCustomersList(result.sort((a, b) => b.id - a.id).slice(0, 100))
-                    }
+
+                setProductData(x)
+
+                let counter2 = 0
+
+                        const result = x.filter(w => w.expiryDate.year === nextYear.toString())
+                        setProductListNextYear(result.sort((a, b) => b.expiryDate.month - a.expiryDate.month).slice(0, 100)) //descending order by id
+
+
+                for (let i = 0; i < x.length; i++) {
+                    if (x[i].expiryDate.year === nextYear.toString()) counter2++;
                 }
-                else{
-                    var result = x.filter(w => (w.phone).includes(text) === true);
-                    if(result.length > 0){
-                        setCustomersList(result.sort((a, b) => b.id - a.id).slice(0, 100))
-                        }
-                } 
-             
+
+                setProductsCountExpNextYr(counter2)
+
                 setIsLoading(false)
-                
             }
 
 
@@ -223,69 +242,127 @@ const Customers = ({ navigation }) => {
             console.log(e)
             setErrMsg(null)
             setIsLoading(false)
-
         }
-        setIsLoading(false);
-        
+
+    }
+
+
+    const getExpiredProducts = async () => {
+
+        setIsLoading(true)
+
+        try {
+
+            var pitems = await AsyncStorage.getItem('productList');
+            if (pitems) {
+
+                var x = JSON.parse(pitems)
+
+                setProductData(x)
+
+                let counter3 = 0
+
+                        const result = x.filter(w => parseInt(w.expiryDate.year) < parseInt(thisYear))
+                        setProductListExpired(result.sort((a, b) => b.expiryDate.month - a.expiryDate.month).slice(0, 100)) //descending order by id
+
+
+                for (let i = 0; i < x.length; i++) {
+                    //if (x[i].expiryDate.year === nextYear.toString()) 
+                    counter3++;
+                }
+
+                setProductsExpired(counter3)
+
+                setIsLoading(false)
+            }
+
+
+        } catch (e) {
+            console.log(e)
+            setErrMsg(null)
+            setIsLoading(false)
+        }
+
     }
 
     useEffect(() => {
-       
-        getCustomersData()
 
-    },[])
+        getProductList()
+
+    }, [])
+
+    useEffect(() => {
+
+        getExpiredProducts()
+
+    }, [])
+
+
+
+    useEffect(() => {
+
+        getProductList2()
+
+    }, [])
+
 
     function renderProducts() {
+
         const renderItem = ({ item }) => (
-            <View
-                style={{ marginBottom: 2, alignItems: 'flex-start', marginTop: 3 }}                
+            <TouchableOpacity
+                style={{ marginBottom: SIZES.padding * 3, alignItems: 'flex-start', marginTop: 3 }}
+                onPress={() => actionsButton(item.id)}
             >
                 <View
                     style={{
                         height: 70,
                         width: '100%',
                         marginBottom: 5,
-                        borderRadius: 10,
+                        borderRadius: 20,
                         justifyContent: 'center',
                         backgroundColor: COLORS.lightGray
                     }}
                 >
-<View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Text style={{flex: 1, fontSize: 18, color: COLORS.black }}>
-                         {item.name}</Text>
-                        <Text style={{flex: 1, textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {(item.phone).slice(0,6)}...</Text>                    
-                        </View>
-<View style={{ flexDirection: 'row', alignItems: 'center' }}>
 
-                    <Text style={{ flex: 1, color: COLORS.emerald }} > {dateToString(item.dateAdded)}</Text>
+                    <Text style={{ textAlign: 'center', flexWrap: 'wrap', fontSize: 18, color: COLORS.black }}>
+                        {item.productName}</Text>
+                    <Text style={{ textAlign: 'center', flexWrap: 'wrap', fontSize: 13, color: COLORS.black }}> In Stock: {item.productQuantity}, Expires: <Text style={{ fontSize: 18 }}> {!item.expiryDate ? null : item.expiryDate.month}-{!item.expiryDate ? null : item.expiryDate.year}</Text></Text>
+
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+
+
+                    <Image
+                                source={icons.product}
+                                style={{ width: 30, height: 30, tintColor: COLORS.red }}
+                            />
                         
-                    <TouchableOpacity
-style={{backgroundColor: COLORS.secondary, color: COLORS.white,borderRadius: 5, width: 50,
-    alignItems: 'center', marginRight: 6}}
-onPress={() => actionsButton(item.id)}>
-<Text style={{ flex: 1, color: COLORS.white }} >Details </Text>
 
-</TouchableOpacity>
-    
-<TouchableOpacity
-style={{backgroundColor: COLORS.emerald, color: COLORS.white,borderRadius: 5, width: 50,
-    alignItems: 'center'}}
-onPress={() => Linking.openURL("tel:"+item.phone)}>
-<Text style={{ flex: 1, color: COLORS.white }} >Call </Text>
+                        <View style={{ flex: 1, height: 1, backgroundColor: COLORS.emerald }} />
+                        <View>
+                            <Text style={{ width: 120, textAlign: 'center', fontSize: 18, color: COLORS.secondary }}> {number_format(item.productSelling)} {currencySymbol} </Text>
+                        </View>
 
-</TouchableOpacity>
-    
+                        <View style={{ flex: 1, height: 1, backgroundColor: COLORS.emerald }} />
 
-                    </View>
+                        <Image
+                                source={icons.product}
+                                style={{ width: 30, height: 30, tintColor: COLORS.red }}
+                            />
+
+                         
+</View>
+                        
+
+
                 </View>
 
 
-            </View>
+            </TouchableOpacity>
         )
 
         return (
             <FlatList
-                data={customersList}
+                data={productListExpired}
                 renderItem={renderItem}
                 style={{ marginTop: SIZES.padding * 2 }}
             />
@@ -293,8 +370,7 @@ onPress={() => Linking.openURL("tel:"+item.phone)}>
     }
 
 
-
-
+    
     function renderAreaCodesModal() {
 
         return (
@@ -362,49 +438,20 @@ onPress={() => Linking.openURL("tel:"+item.phone)}>
                 </View>
 
                 <SafeAreaView style={STYLES.signupFooter}>
-                <TouchableOpacity
-                    style={{
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}
-                    onPress={() => 
-                         navigation.navigate('AddCustomer')
-                    }
-                >
-                    <LinearGradient
-                        colors={["transparent", "transparent"]}
-                        style={STYLES.signUpPage}
+
+
+
+                    <ScrollView
+                        showsVerticalScrollIndicator={false}
+                        showsHorizontalScrollIndicator={false}
+                        scrollEnabled={false}
+                        style={{ height: 100 }}
                     >
-                        <Text style={{
-                            color: COLORS.secondary,
-                            fontWeight: 'bold'
-                        }}>Add Customer</Text>
-                    </LinearGradient>
+                        <View style={{ marginTop: SIZES.padding * 2 }}>
+                        <Text style={{ fontSize: 15, color: COLORS.red }}>Expired Products: {number_format(productsExpired)}</Text>
+                        </View>
 
-                </TouchableOpacity>
-
-                <View
-                    style={{
-                        width: '100%',
-                        borderRadius: 10,
-                        justifyContent: 'center',
-                        padding: 10
-                    }}
-                >
-<View>
-                    <TextInput
-                        returnKeyType="next"
-                        value={search}
-                        maxLength={100}
-                        onChangeText={(text) =>{
-                            setSearch(text);
-                            filterCustomersList(text);}}
-                        label='Search'
-                        mode='outlined'
-                        theme={STYLES.textInput}
-                    />
-                </View>
-</View>
+                    </ScrollView>
                     <ScrollView
                         showsVerticalScrollIndicator={false}
                         showsHorizontalScrollIndicator={false}
@@ -427,13 +474,16 @@ onPress={() => Linking.openURL("tel:"+item.phone)}>
 
                         }
 
-                    </ScrollView>
+                      
+    </ScrollView>
+
                 </SafeAreaView>
+
+
             </LinearGradient>
-            
             {renderAreaCodesModal()}
         </KeyboardAvoidingView>
     )
 }
 
-export default Customers;
+export default ExpiredProducts;

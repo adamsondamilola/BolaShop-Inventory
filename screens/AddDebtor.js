@@ -146,7 +146,7 @@ if(phone.length > 0){
         else if (description.length > 100) setErrMsg("Description too long");
         else if (!phone) setErrMsg("Enter phone number.");
         else if (phone.length > 25) setErrMsg("Phone number too long.");
-        else if (isNaN(phone) === true) setErrMsg("Phone number should be numbers.");
+        else if (isNaN(parseFloat(phone)) === true) setErrMsg("Phone number should be numbers.");
         else if (!cNum) setErrMsg("Phone number is not associated with any customer. Add profile to customers list");
         else if (!amount) setErrMsg("Enter amount.");
         else if (parseInt(amount) < 1) setErrMsg("Enter a valid amount");

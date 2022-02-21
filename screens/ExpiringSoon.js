@@ -28,6 +28,7 @@ const ExpiringSoon = ({ navigation }) => {
     const [productData, setProductData] = useState([])
     const [productList, setProductList] = useState([])
     const [productListNextYear, setProductListNextYear] = useState([])
+    const [productListExpired, setProductListExpired] = useState([])
 
 
     const [showPassword, setShowPassword] = React.useState(false)
@@ -48,6 +49,7 @@ const ExpiringSoon = ({ navigation }) => {
     const [searchOn, setSearchOn] = useState(false);
     const [scanned, setScanned] = useState(null);
 
+    const [productsExpired, setProductsExpired] = useState(0)
     const [productsCount, setProductsCount] = useState(0)
     const [productsCountExpNextYr, setProductsCountExpNextYr] = useState(0)
 
@@ -245,9 +247,53 @@ const ExpiringSoon = ({ navigation }) => {
     }
 
 
+    const getExpiredProducts = async () => {
+
+        setIsLoading(true)
+
+        try {
+
+            var pitems = await AsyncStorage.getItem('productList');
+            if (pitems) {
+
+                var x = JSON.parse(pitems)
+
+                setProductData(x)
+
+                let counter3 = 0
+
+                        const result = x.filter(w => parseInt(w.expiryDate.year) < parseInt(thisYear))
+                        setProductListExpired(result.sort((a, b) => b.expiryDate.month - a.expiryDate.month).slice(0, 100)) //descending order by id
+
+
+                for (let i = 0; i < x.length; i++) {
+                    //if (x[i].expiryDate.year === nextYear.toString()) 
+                    counter3++;
+                }
+
+                setProductsExpired(counter3)
+
+                setIsLoading(false)
+            }
+
+
+        } catch (e) {
+            console.log(e)
+            setErrMsg(null)
+            setIsLoading(false)
+        }
+
+    }
+
     useEffect(() => {
 
         getProductList()
+
+    }, [])
+
+    useEffect(() => {
+
+        getExpiredProducts()
 
     }, [])
 
@@ -647,7 +693,17 @@ const ExpiringSoon = ({ navigation }) => {
                         style={{ height: 100 }}
                     >
                         <View style={{ marginTop: SIZES.padding * 2 }}>
-                            <Text style={{ fontSize: 15, color: COLORS.secondary }}>Expiring This Year: {number_format(productsCount)}</Text>
+                        <TouchableOpacity
+                onPress={() => navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'ExpiredProducts' }],
+                })
+                }
+            >   
+                          
+                        <Text style={{ fontSize: 15, color: COLORS.red }}>Expired: {number_format(productsExpired)}</Text>
+                        </TouchableOpacity> 
+                        <Text style={{ fontSize: 15, color: COLORS.secondary, marginTop: 10  }}>Expiring This Year: {number_format(productsCount)}</Text>
                             <Text style={{ fontSize: 15, marginTop: 10 }}>Expiring Next Year: {number_format(productsCountExpNextYr)}</Text>
                         </View>
 

@@ -30,6 +30,7 @@ import ViewCustomer from './ViewCustomer';
 import Debtors from './Debtors';
 import AddDebtor from './AddDebtor';
 import ViewDebtor from './ViewDebtor';
+import ExpiredProducts from './ExpiredProducts';
 
 const Tab = createBottomTabNavigator();
 
@@ -326,6 +327,13 @@ const BottomTabs = () => {
             />
             
             <Tab.Screen name="ViewDebtor" component={ViewDebtor}
+                options={{
+                    tabBarButton: () => null,
+                    tabBarVisible: false,
+                }}
+            />
+
+<Tab.Screen name="ExpiredProducts" component={ExpiredProducts}
                 options={{
                     tabBarButton: () => null,
                     tabBarVisible: false,
