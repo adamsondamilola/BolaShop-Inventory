@@ -99,7 +99,7 @@ const Debtors = ({ navigation }) => {
 
                 <Text style={{ marginLeft: SIZES.padding * 1.5, color: COLORS.white, ...FONTS.h4 }}>{title}</Text>
             </TouchableOpacity>
-            <Text style={{ flex: 1,marginTop: 50, marginLeft: SIZES.padding * 1.5, color: COLORS.white, ...FONTS.h2 }}>{number_format(totalAmountPending)} {currencySymbol}</Text>
+            <Text style={{ flex: 1,marginTop: 50, marginLeft: SIZES.padding * 1.5, color: COLORS.white, ...FONTS.h4 }}>{number_format(totalAmountPending)} {currencySymbol}</Text>
             </View>
         )
     }
@@ -127,7 +127,7 @@ const Debtors = ({ navigation }) => {
         setIsLoading(true)
 
         try {
-            await AsyncStorage.setItem('pageNumber', id);
+            await AsyncStorage.setItem('pageNumber', id.toString());
             setIsLoading(false)
 
             navigation.reset({
@@ -159,7 +159,8 @@ const Debtors = ({ navigation }) => {
 
                 let counter = 0
 
-                setDebtorsList(x.sort((b, a) => b.status - a.status).slice(0, 100)) //Ascending order by quantity/i stock
+            //    setDebtorsList(x.sort((b, a) => b.status - a.status).slice(0, 100)) //Ascending order by quantity/i stock
+                setDebtorsList(x.sort((a, b) => b.id - a.id).slice(0, 100)) //Ascending order by quantity/i stock
 
                 for (let i = 0; i < debtorsData.length; i++) {
                     if (debtorsData[i].id > 0 && debtorsData[i].status > 0) counter++;
@@ -201,7 +202,7 @@ const Debtors = ({ navigation }) => {
                 var x = JSON.parse(pitems)
                 setDebtorsData(x)
                 if(isNaN(text) === true){
-                    var result = x.filter(w => (w.description).toLowerCase().includes(text.toLowerCase()) === true);
+                    var result = x.filter(w => (w.name).toLowerCase().includes(text.toLowerCase()) === true);
                     if(result.length > 0){
                         setDebtorsList(result.sort((a, b) => b.id - a.id).slice(0, 100))
                         let total_amount = 0;
@@ -243,7 +244,6 @@ const Debtors = ({ navigation }) => {
     }
 
     useEffect(() => {
-
         getDebtorsData()
 
     },[])
@@ -266,8 +266,8 @@ const Debtors = ({ navigation }) => {
                     }}
                 >
 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Text style={{flex: 1, fontSize: 18, color: COLORS.black }}>
-                         {item.phone}</Text>
+                        <Text style={{ flex: 1, fontSize: 18, color: COLORS.black }}>
+                            {item.name}</Text>
                         <Text style={{flex: 1, textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {number_format(parseFloat(item.amount))} {currencySymbol}</Text>                    
                         </View>
 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -277,15 +277,15 @@ const Debtors = ({ navigation }) => {
                     <TouchableOpacity
 style={{backgroundColor: COLORS.secondary, color: COLORS.white,borderRadius: 5, width: 50,
     alignItems: 'center', marginRight: 6}}
-onPress={() => actionsButton(item.phone)}>
-<Text style={{ flex: 1, color: COLORS.white }}> Details </Text>
+onPress={() => actionsButton(item.id)}>
+                            <Text style={{ flex: 1, color: COLORS.white, textAlign: 'center', fontSize: 12 }}> Details </Text>
 </TouchableOpacity>
 
     {item.status == 0 ? 
     <TouchableOpacity
     style={{backgroundColor: COLORS.red, color: COLORS.white,borderRadius: 5,
         alignItems: 'center', marginRight: 6}}>
-    <Text style={{ flex: 1, color: COLORS.white }}> Pending </Text>
+                                <Text style={{ flex: 1, color: COLORS.white, textAlign: 'center', fontSize: 12 }}> Pending </Text>
     </TouchableOpacity>
 
     :
@@ -293,7 +293,7 @@ onPress={() => actionsButton(item.phone)}>
     <TouchableOpacity
 style={{backgroundColor: COLORS.emerald, color: COLORS.white,borderRadius: 5, width: 50,
     alignItems: 'center', marginRight: 6}}>
-<Text style={{ flex: 1, color: COLORS.white }}> Paid </Text>
+                                <Text style={{ flex: 1, color: COLORS.white, textAlign: 'center', fontSize: 12 }}> Paid </Text>
 </TouchableOpacity>
 }
 
@@ -301,7 +301,7 @@ style={{backgroundColor: COLORS.emerald, color: COLORS.white,borderRadius: 5, wi
 style={{backgroundColor: COLORS.emerald, color: COLORS.white,borderRadius: 5, width: 50,
     alignItems: 'center', marginRight: 6}}
 onPress={() => Linking.openURL("tel:"+item.phone)}>
-<Text style={{ flex: 1, color: COLORS.white }} > Call </Text>
+                            <Text style={{ flex: 1, color: COLORS.white, textAlign: 'center', fontSize: 12 }} > Call </Text>
 </TouchableOpacity>
 
 

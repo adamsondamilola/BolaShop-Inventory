@@ -364,8 +364,7 @@ const Expenses = ({ navigation }) => {
                     }}
                 >
 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Text style={{flex: 1, fontSize: 18, color: COLORS.black }}>
-                         {item.title}</Text>
+                    <Text style={{flex: 1, fontSize: 18, color: COLORS.black }}> {item.title}</Text>
                         <Text style={{flex: 1, textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {number_format(item.amount)} {currencySymbol} </Text>
                     
                         </View>
@@ -377,7 +376,7 @@ const Expenses = ({ navigation }) => {
 style={{backgroundColor: COLORS.secondary, color: COLORS.white,borderRadius: 5, width: 50,
     alignItems: 'center'}}
 onPress={() => actionsButton(item.id)}>
-<Text style={{ flex: 1, color: COLORS.white }} >Details </Text>
+                            <Text style={{ flex: 1, color: COLORS.white, textAlign: 'center', fontSize: 12 }} > Details </Text>
 
 </TouchableOpacity>
     

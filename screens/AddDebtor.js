@@ -39,6 +39,7 @@ const AddDebtor = ({ navigation, route }) => {
     const [phone, setPhone] = useState(null)
     const [description, setDescription] = useState(null)
     const [amount, setAmount] = useState(null)
+    let name = null
     const [id, setId] = useState(1)
 
     const [ifExists, setIfExists] = useState(false)
@@ -46,6 +47,7 @@ const AddDebtor = ({ navigation, route }) => {
     let debtorsList = [{
         "id": id,
         "status": 0,
+        "name": name,
         "phone": phone,
         "amount": amount,
         "description": description,
@@ -96,7 +98,7 @@ const AddDebtor = ({ navigation, route }) => {
     }
 
     const checkIfNumberExists = async (phone) => {
-        let response = false;
+        let response = true;
         try {    
             var pitems = await AsyncStorage.getItem('customersList');    
             if (pitems) {    
@@ -106,6 +108,12 @@ const AddDebtor = ({ navigation, route }) => {
             if(filtered.length > 0)
             {                
                 response = true;
+                name = filtered[0].name
+
+                var objIndex = debtorsList.findIndex((obj => obj.id === id));
+                //Update object's property.
+                debtorsList[objIndex].name = name
+
             }
             else{
                 response = false;
@@ -113,6 +121,7 @@ const AddDebtor = ({ navigation, route }) => {
     
             }    
         } catch (e) {
+            alert(e)
             response = false;
         } 
         return response; 
@@ -149,6 +158,7 @@ if(phone.length > 0){
         else if (isNaN(parseFloat(phone)) === true) setErrMsg("Phone number should be numbers.");
         else if (!cNum) setErrMsg("Phone number is not associated with any customer. Add profile to customers list");
         else if (!amount) setErrMsg("Enter amount.");
+        else if (debtorsList[0].name == null) setErrMsg("Name is null. Try again" + debtorsList[0].name);
         else if (parseInt(amount) < 1) setErrMsg("Enter a valid amount");
         
         else {
@@ -176,6 +186,7 @@ if(phone.length > 0){
                         let debtorsList_ = {
                             "id": newId,
                             "status": 0,
+                            "name": name,
                             "phone": phone,
                             "amount": amount,
                             "description": description,

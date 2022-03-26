@@ -106,7 +106,7 @@ const Dashboard = ({ navigation }) => {
             icon: images.logo,
             color: COLORS.emerald,
             backgroundColor: COLORS.lightGray,
-            description: "All Products"
+            description: "Products"
         },
         {
             id: 2,
@@ -141,7 +141,7 @@ const Dashboard = ({ navigation }) => {
             icon: icons.expire,
             color: COLORS.secondary,
             backgroundColor: COLORS.lightGray,
-            description: "Expires Soon"
+            description: "Expires"
         },        
         {
             id: 7,
@@ -318,7 +318,7 @@ const Dashboard = ({ navigation }) => {
     }
 
     const actionsButton = async (description) => {
-        if (description === "All Products") {
+        if (description === "Products") {
 
             await navigation.reset({
                 index: 0,
@@ -351,7 +351,7 @@ const Dashboard = ({ navigation }) => {
             });
         }
 
-        if (description === "Expires Soon") {
+        if (description === "Expires") {
             await navigation.reset({
                 index: 0,
                 routes: [{ name: 'ExpiringSoon' }],
@@ -406,14 +406,14 @@ const Dashboard = ({ navigation }) => {
 
         const renderItem = ({ item }) => (
             <TouchableOpacity
-                style={{ marginBottom: SIZES.padding * 0, width: 80, height:80, alignItems: 'center' }}
+                style={{ marginBottom: SIZES.padding * 0, width: 80, height: 80, alignItems: 'center' }}
                 onPress={() => actionsButton(item.description)}
             >
                 <View
                     style={{
                         height: 50,
                         width: 50,
-                        marginBottom: 5,
+                        marginBottom: 10,
                         borderRadius: 20,
                         backgroundColor: item.backgroundColor,
                         alignItems: 'center',
@@ -495,8 +495,8 @@ style={{ marginBottom: 2, alignItems: 'flex-start', marginTop: 3 }}
     <TouchableOpacity
 style={{backgroundColor: COLORS.secondary, color: COLORS.white,borderRadius: 5, height: 20, width: 50,
 alignItems: 'center', marginRight: 6}}
-onPress={() => viewAction(item.id)}>
-<Text style={{ flex: 1, color: COLORS.white }} >Details </Text>
+                            onPress={() => viewAction(item.id)}>
+                            <Text style={{ flex: 1, color: COLORS.white, textAlign: 'center', fontSize: 12 }}> Details </Text>
 
 </TouchableOpacity>
 

@@ -42,10 +42,15 @@ const ViewDebtor = ({ navigation, route }) => {
     const [description, setDescription] = useState(null)
     const [amount, setAmount] = useState(null)
     const [phone, setPhone] = useState(null)
+    const [email, setEmail] = useState(null)
+    const [signUpDate, setSignUpDate] = useState(null)
+    const [location, setLocation] = useState(null)
 
     const title = "Debtor Details"
 
-    const [pageNumber, setPageNumber] = useState(null);   
+    const [pageNumber, setPageNumber] = useState(null);
+
+    const [showDetails, setShowDetails] = useState(false);
 
     const getSettings = () => {
         try {
@@ -66,7 +71,7 @@ const ViewDebtor = ({ navigation, route }) => {
 
 
     const [customerData, setCustomerData] = useState([])
-    const [customersList, setCustomersList] = useState([])
+    let customersList = []
     const [debtorsData, setDebtorsData] = useState([])
     const [debtorsList, setDebtorsList] = useState([])
 
@@ -96,7 +101,7 @@ if(debtorsData.length > 0)
                 if (jsonresult != null) {
                     setPageNumber(jsonresult)
                     for (let x of debtorsData) {
-                        if (x.phone === pageNumber) {
+                        if (x.id == pageNumber) {
                             setDebtorsList(x)
                         }
                     }
@@ -112,43 +117,54 @@ if(debtorsData.length > 0)
     }
 
     const getCustomerDetails = async () => {
+        setIsLoading(true)
+        let list = null;
         try {
             var pitems = await AsyncStorage.getItem('customersList');
             if (pitems) {
 
                 var x = JSON.parse(pitems)
-                setCustomerData(x)
-
+                list = x
+//                setCustomerData(x)
+//                alert(JSON.stringify(customerData))
             }
 
         } catch (e) {
             console.log(e)
             setErrMsg(null)
         }
-
+        
         try {
 
-            if(customerData.length > 0){
-            await AsyncStorage.getItem('pageNumber', (err, result) => {
-                //  console.log(result);
-                let jsonresult = result
-                if (jsonresult != null) {
-                    setPageNumber(jsonresult)
+            if (list != null) {
+                
+                    // alert(customerData)
+                    var x = list.filter(y => parseFloat(y.phone) == parseFloat(debtorsList.phone))
+                    customersList = x[0]
+                    setPhone(customersList.phone)
+                    setEmail(customersList.email)
+                    setLocation(customersList.location)
+                    setSignUpDate(customersList.dateAdded)
+                    //alert(customersList.phone)
+                   // alert(JSON.stringify(phone))
+                    /*
                     for (let x of customerData) {
-                        if (x.phone == pageNumber) {
+                        if (x.phone === pageNumber) {
                             setCustomersList(x)
                         }
-                    }
+                    } */
 
-                }
-            });
 
             }
         } catch (e) {
             console.log(e)
+            
             setErrMsg(null)
         }
-
+        if (customersList.phone != null) {
+            setIsLoading(false)
+            setShowDetails(true)
+        }
     }
     let isRendered = useRef(false);
     useEffect(() => {
@@ -162,7 +178,7 @@ if(debtorsData.length > 0)
 
             getSettings()
             getDebtorDetails();
-            getCustomerDetails()
+          //  getCustomerDetails()
 
         }
 
@@ -282,7 +298,7 @@ if(debtorsData.length > 0)
                             style={{ width: 30, height: 30, tintColor: COLORS.emerald }}
                         />
                         <Text style={{ fontSize: 15 }}> Amount:</Text>
-<Text style={{flex: 1, textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {number_format(debtorsList.amount)}  </Text>                            
+                        <Text style={{ flex: 1, textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {number_format(parseFloat(debtorsList.amount))}  </Text>
                     </View>
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
@@ -385,8 +401,8 @@ style={{flex: 1, backgroundColor: COLORS.emerald, color: COLORS.white,borderRadi
                         />
                         <TouchableOpacity
 style={{flex: 1}}
-onPress={() => Linking.openURL("tel:"+customersList.phone)}>
-<Text style={{textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {customersList.phone}  </Text>
+onPress={() => Linking.openURL("tel:"+phone)}>
+<Text style={{textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {phone}  </Text>
 </TouchableOpacity>
                             
 
@@ -400,8 +416,8 @@ onPress={() => Linking.openURL("tel:"+customersList.phone)}>
                         />
                           <TouchableOpacity
 style={{flex: 1}}
-onPress={customersList.email !== null ? () => Linking.openURL("mailto:"+customersList.email): null}>
-<Text style={{textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {customersList.email}  </Text>
+onPress={customersList.email !== null ? () => Linking.openURL("mailto:"+email): null}>
+<Text style={{textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {email}  </Text>
 </TouchableOpacity>
 
                     </View>
@@ -412,7 +428,7 @@ onPress={customersList.email !== null ? () => Linking.openURL("mailto:"+customer
                             source={icons.location}
                             style={{ width: 30, height: 30, tintColor: COLORS.secondary }}
                         />
-                            <Text style={{ flex: 1, textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {customersList.address}</Text>
+                        <Text style={{ flex: 1, textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {location}</Text>
 
                     </View>
 
@@ -421,7 +437,7 @@ onPress={customersList.email !== null ? () => Linking.openURL("mailto:"+customer
                             source={icons.date}
                             style={{ width: 25, height: 25, tintColor: COLORS.orange }}
                         />
-                            <Text style={{  flex: 1, textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {dateToString(customersList.dateAdded)} </Text>
+                            <Text style={{  flex: 1, textAlign: 'right', fontSize: 18, color: COLORS.secondary }}> {dateToString(signUpDate)} </Text>
                         
                     </View>
 
@@ -488,6 +504,30 @@ onPress={customersList.email !== null ? () => Linking.openURL("mailto:"+customer
 
                     </TouchableOpacity>
                 </View>
+
+                {!showDetails ? 
+                    <View>
+                        <TouchableOpacity
+                            style={{
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: 300,
+                            }}
+                            onPress={() => { getCustomerDetails() }}
+                        >
+                            <LinearGradient
+                                colors={[COLORS.emerald, COLORS.green]}
+                                style={STYLES.defaultButton}
+                            >
+                                <Text style={{
+                                    color: '#fff',
+                                    fontWeight: 'bold'
+                                }}>Get Customer Details</Text>
+                            </LinearGradient>
+
+                        </TouchableOpacity>
+                    </View>
+                    : null}
 
 
 
@@ -825,7 +865,7 @@ onPress={customersList.email !== null ? () => Linking.openURL("mailto:"+customer
                     >
                         {!update? renderDebtorDetails(): renderUpdateForm()}
 
-                        {debtorsList == '' ?
+                        {isLoading ?
                             <TouchableOpacity
                                 style={{
                                     alignItems: 'center',
@@ -839,7 +879,7 @@ onPress={customersList.email !== null ? () => Linking.openURL("mailto:"+customer
                             : null
                         }
 
-                        {!update? renderCustomerDetails() : null }                       
+                        {showDetails? renderCustomerDetails() : null }
 
                     </ScrollView>
 

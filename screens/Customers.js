@@ -263,7 +263,7 @@ const Customers = ({ navigation }) => {
 style={{backgroundColor: COLORS.secondary, color: COLORS.white,borderRadius: 5, width: 50,
     alignItems: 'center', marginRight: 6}}
 onPress={() => actionsButton(item.id)}>
-<Text style={{ flex: 1, color: COLORS.white }} >Details </Text>
+                            <Text style={{ flex: 1, color: COLORS.white, textAlign: 'center', fontSize: 12 }} > Details </Text>
 
 </TouchableOpacity>
     
@@ -271,7 +271,7 @@ onPress={() => actionsButton(item.id)}>
 style={{backgroundColor: COLORS.emerald, color: COLORS.white,borderRadius: 5, width: 50,
     alignItems: 'center'}}
 onPress={() => Linking.openURL("tel:"+item.phone)}>
-<Text style={{ flex: 1, color: COLORS.white }} >Call </Text>
+                            <Text style={{ flex: 1, color: COLORS.white, textAlign: 'center', fontSize: 12 }} > Call </Text>
 
 </TouchableOpacity>
     

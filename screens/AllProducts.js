@@ -402,7 +402,7 @@ const AllProducts = ({ navigation }) => {
   style={{backgroundColor: COLORS.secondary, color: COLORS.white,borderRadius: 5, width: 50, height: 20,
   alignItems: 'center', marginRight: 6}}
   onPress={() => actionsButton(item.id)}>
-  <Text style={{ flex: 1, color: COLORS.white }} >Details </Text>
+                            <Text style={{ flex: 1, color: COLORS.white, textAlign: 'center', fontSize: 12 }} >Details </Text>
   
   </TouchableOpacity>
   
@@ -419,7 +419,7 @@ const AllProducts = ({ navigation }) => {
         }
     }],
 })}>
-  <Text style={{ flex: 1, color: COLORS.white }} >Add to Cart </Text>
+                            <Text style={{ flex: 1, color: COLORS.white, textAlign: 'center', fontSize: 12 }} > Add to Cart </Text>
   
   </TouchableOpacity>
       </View>
