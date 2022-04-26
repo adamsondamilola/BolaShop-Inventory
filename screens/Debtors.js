@@ -276,8 +276,9 @@ const Debtors = ({ navigation }) => {
                         
                     <TouchableOpacity
 style={{backgroundColor: COLORS.secondary, color: COLORS.white,borderRadius: 5, width: 50,
-    alignItems: 'center', marginRight: 6}}
-onPress={() => actionsButton(item.id)}>
+                                alignItems: 'center', marginRight: 6
+                            }}
+                            onPress={() => actionsButton(item.phone)}>
                             <Text style={{ flex: 1, color: COLORS.white, textAlign: 'center', fontSize: 12 }}> Details </Text>
 </TouchableOpacity>
 

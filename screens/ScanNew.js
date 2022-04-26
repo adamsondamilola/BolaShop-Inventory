@@ -20,6 +20,25 @@ const ScanNew = ({ navigation }) => {
     const [scannerVisible, setScannerVisible] = useState(true);
     let title = "Scan New Product"
 
+    const checkCameraPermission = async () => {
+        let x = null;
+        try {
+            x = await AsyncStorage.getItem('iHaveUsedCamera')
+        } catch (e) {
+            console.log(e)
+        }
+        if (x === null) {
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'CameraPermission', params: { lastroute: 'ScanNew' } }],
+            })
+        }
+        else {
+            const { status } = await BarCodeScanner.requestPermissionsAsync();
+            setHasPermission(status === 'granted');
+        }
+    }
+
     function renderHeader() {
         return (
             <TouchableOpacity
@@ -145,10 +164,9 @@ const ScanNew = ({ navigation }) => {
 
 
     useEffect(() => {
-        (async () => {
-            const { status } = await BarCodeScanner.requestPermissionsAsync();
-            setHasPermission(status === 'granted');
-        })();
+
+        checkCameraPermission();
+        
     }, []);
 
     const handleBarCodeScanned = ({ type, data }) => {

@@ -350,7 +350,7 @@ const AddProduct = ({ navigation, route }) => {
                         keyboardType="numeric"
                         value={productExpiryMonth}
                         onChangeText={text => setProductExpiryMonth(text)}
-                        label='Expiry Month'
+                        label='Expiry Month (Optional)'
                         mode='outlined'
                         maxLength={2}
                         theme={STYLES.textInput}
@@ -361,7 +361,7 @@ const AddProduct = ({ navigation, route }) => {
                         keyboardType="numeric"
                         value={productExpiryYear}
                         onChangeText={text => setProductExpiryYear(text)}
-                        label='Expiry Year'
+                        label='Expiry Year (Optional)'
                         mode='outlined'
                         mask="YYYY"
                         maxLength={4}

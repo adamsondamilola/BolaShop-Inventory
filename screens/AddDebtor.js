@@ -12,7 +12,7 @@ import {
     Platform
 } from "react-native"
 import { LinearGradient } from 'expo-linear-gradient'
-import { TextInput, Text } from 'react-native-paper';
+import { TextInput, Text, Menu } from 'react-native-paper';
 
 import { COLORS, SIZES, FONTS, icons, images } from "../constants"
 import { STYLES } from "../constants/theme";
@@ -61,8 +61,21 @@ const AddDebtor = ({ navigation, route }) => {
         setAmount(null)
     }
 
-    
-    
+
+    const [customers, setCustomers] = useState([]);
+    const [selectCustomers, setSelectCustomers] = useState(false);
+    const selectAllCustomer = async () => {
+        try {
+            var customers = await AsyncStorage.getItem('customersList');
+            if (customers) {
+                var x = JSON.parse(customers)
+                setCustomers(x)
+                
+            }
+        } catch (e) {
+            setCustomers([])
+        }
+    }
     const getSettings = () => {
         try {
             AsyncStorage.getItem('shopSettings', (err, result) => {
@@ -74,16 +87,12 @@ const AddDebtor = ({ navigation, route }) => {
             console.log(e)
             navigation.navigate('Settings')
         }
+        
     }
 
 
     useEffect(() => {
-
-          //  checkIfCodeExists()
-
-    }, [])
-
-    useEffect(() => {
+        selectAllCustomer();
         getSettings();
 
     }, [])
@@ -227,6 +236,70 @@ if(phone.length > 0){
         setModalVisible(true)
     }
 
+    const selectCustomerAction = (xphone) => {
+        setPhone(xphone)
+        setSelectCustomers(false)
+    }
+    function renderCustomers() {
+        const renderItem = ({ item }) => (
+            <View>
+
+                    <Menu.Item onPress={() => selectCustomerAction(item.phone)} title={item.name + " (" + item.phone + ")"} />
+                        <View style={{ height: 1, backgroundColor: COLORS.secondary }} />
+
+            </View>
+            )
+        return (
+            <FlatList
+                data={customers}
+                renderItem={renderItem}
+                style={{ marginTop: SIZES.padding * 2 }}
+            />
+        )
+    }
+
+    const [search, setSearch] = useState(null)
+        const filterDebtorsList = async (text) => {
+        
+        setIsLoading(true)
+       
+        try {
+            
+            var pitems = await AsyncStorage.getItem('customersList');
+
+            if (pitems) {
+
+                var x = JSON.parse(pitems)
+                setDebtorsData(x)
+                if(isNaN(text) === true){
+                    var result = x.filter(w => (w.name).toLowerCase().includes(text.toLowerCase()) === true);
+                    if (result.length > 0) {
+                        setCustomers(result.sort((a, b) => b.id - a.id).slice(0, 100))
+                        }
+                }
+                else{
+                    var result = x.filter(w => (w.phone).includes(text) === true);
+                    if(result.length > 0){
+                        setCustomers(result.sort((a, b) => b.id - a.id).slice(0, 100))
+                        
+                        }
+                } 
+             
+                setIsLoading(false)
+                
+            }
+
+
+        } catch (e) {
+            console.log(e)
+            setErrMsg(null)
+            setIsLoading(false)
+
+        }
+            setIsLoading(false);
+
+    }
+
 
 
     function renderHeader() {
@@ -280,43 +353,78 @@ if(phone.length > 0){
                     marginHorizontal: SIZES.padding * 3,
                 }}
             >
-                <View style={{ marginTop: SIZES.padding * 3 }}>
-                    <TextInput
-                        returnKeyType="next"
-                        keyboardType="number-pad"
-                        value={phone}
-                        maxLength={50}
-                        onChangeText={text => setPhone(text)}
-                        label='Phone Number'
-                        mode='outlined'
-                        theme={STYLES.textInput}
-                    />
-                </View>
 
-                <View style={{ marginTop: SIZES.padding * 3 }}>
-                    <TextInput
-                        returnKeyType="next"
-                        keyboardType="default"
-                        value={description}
-                        onChangeText={text => setDescription(text)}
-                        label='Description'
-                        mode='outlined'
-                        theme={STYLES.textInput}
-                    />
-                </View>
+                
 
-                <View style={{ marginTop: SIZES.padding * 3 }}>
-                    <TextInput
-                        returnKeyType="done"
-                        keyboardType="number-pad"
-                        value={amount}
-                        onChangeText={text => setAmount(text)}
-                        label='Amount'
-                        mode='outlined'
-                        theme={STYLES.textInput}
-                    />
-                </View>
+                {!selectCustomers ?
+                    <View>
+                        <View style={{ marginTop: SIZES.padding * 3 }}>
 
+
+
+                            <TextInput
+                                returnKeyType="next"
+                                keyboardType="number-pad"
+                                value={phone}
+                                maxLength={50}
+                                onFocus={() => setSelectCustomers(true)}
+                                label='Select Customer'
+                                mode='outlined'
+                                theme={STYLES.textInput}
+                            />
+                        </View>
+
+                        <View style={{ marginTop: SIZES.padding * 3 }}>
+                            <TextInput
+                                returnKeyType="next"
+                                keyboardType="default"
+                                value={description}
+                                onChangeText={text => setDescription(text)}
+                                label='Description'
+                                mode='outlined'
+                                theme={STYLES.textInput}
+                            />
+                        </View>
+
+                        <View style={{ marginTop: SIZES.padding * 3 }}>
+                            <TextInput
+                                returnKeyType="done"
+                                keyboardType="number-pad"
+                                value={amount}
+                                onChangeText={text => setAmount(text)}
+                                label='Amount'
+                                mode='outlined'
+                                theme={STYLES.textInput}
+                            />
+                        </View>
+                    </View>
+                    :
+                    <View>
+                        {customers != "" ?
+                            <Text style={{ marginLeft: SIZES.padding * 1.5, ...FONTS.h4 }}>
+                                Select a Customer
+                            </Text>
+                            :
+                            <Text style={{ marginLeft: SIZES.padding * 1.5, ...FONTS.h4 }}>
+                                You don't have customer yet. To add new customer,
+                                go to the Dashboard and click Customers</Text>
+                        }
+                        {/*  <TextInput
+                            returnKeyType="search"
+                            value={search}
+                            maxLength={100}
+                            onChangeText={(text) => {
+                                setSearch(text);
+                                filterDebtorsList(text);
+                            }}
+                            label='Search Customer'
+                            mode='outlined'
+                            theme={STYLES.textInput}
+                        /> */}
+                        { renderCustomers() }
+                    </View>
+                    
+                }
             </View>
         )
     }
@@ -435,7 +543,7 @@ if(phone.length > 0){
                         showsHorizontalScrollIndicator={false}
                     >
                         {renderBody()}
-                        {renderButton()}
+                        {!selectCustomers? renderButton() : null}
                     </ScrollView>
                 </SafeAreaView>
 

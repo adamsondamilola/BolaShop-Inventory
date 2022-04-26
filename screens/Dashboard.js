@@ -67,6 +67,23 @@ const Dashboard = ({ navigation }) => {
 
 
     const getSettings = () => {
+
+        try {
+            AsyncStorage.getItem('welcomeNewUser', (err, result) => {
+                console.log(result);
+                let jsonresult = JSON.parse(JSON.stringify(result))
+                if (jsonresult === null) {
+                    navigation.reset({
+                        index: 0,
+                        routes: [{ name: 'IntroScreen' }],
+                    })
+                }
+            });
+        } catch (e) {
+            console.log(e)
+        }
+
+
         try {
             AsyncStorage.getItem('shopSettings', (err, result) => {
                 console.log(result);

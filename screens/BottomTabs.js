@@ -31,6 +31,8 @@ import Debtors from './Debtors';
 import AddDebtor from './AddDebtor';
 import ViewDebtor from './ViewDebtor';
 import ExpiredProducts from './ExpiredProducts';
+import CameraPermission from './CameraPermission';
+import IntroScreen from './IntroScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -333,12 +335,28 @@ const BottomTabs = () => {
                 }}
             />
 
-<Tab.Screen name="ExpiredProducts" component={ExpiredProducts}
+            <Tab.Screen name="ExpiredProducts" component={ExpiredProducts}
                 options={{
                     tabBarButton: () => null,
                     tabBarVisible: false,
                 }}
             />
+
+            <Tab.Screen name="CameraPermission" component={CameraPermission}
+                options={{
+                    tabBarButton: () => null,
+                    tabBarVisible: false,
+                }}
+            />
+
+            <Tab.Screen name="IntroScreen" component={IntroScreen}
+                options={{
+                    tabBarButton: () => null,
+                    tabBarVisible: false,
+                }}
+            />
+
+
             
             </Tab.Navigator>
 

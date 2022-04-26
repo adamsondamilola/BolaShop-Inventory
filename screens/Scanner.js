@@ -13,6 +13,26 @@ const Scanner = ({ navigation }) => {
 
     let title = "Scan Product"
 
+    const [permitted, setPermitted] = useState(false)
+    const checkCameraPermission = async () => {
+        let x = null;
+        try {
+            x = await AsyncStorage.getItem('iHaveUsedCamera')
+        } catch (e) {
+            console.log(e)
+        }
+        if (x === null) {
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'CameraPermission', params: { lastroute: 'Scanner' } }],
+            })
+        } else {
+            setPermitted(true)
+            const { status } = await BarCodeScanner.requestPermissionsAsync();
+            setHasPermission(status === 'granted');
+        }
+    }
+
     function renderHeader() {
         return (
             <TouchableOpacity
@@ -111,10 +131,7 @@ const Scanner = ({ navigation }) => {
 
 
     useEffect(() => {
-        (async () => {
-            const { status } = await BarCodeScanner.requestPermissionsAsync();
-            setHasPermission(status === 'granted');
-        })();
+        checkCameraPermission();
     }, []);
 
     const handleBarCodeScanned = async ({ type, data }) => {
@@ -137,46 +154,49 @@ const Scanner = ({ navigation }) => {
     }
 
     return (
-        <LinearGradient
+         <LinearGradient
             colors={[COLORS.green, COLORS.emerald]}
             style={{ flex: 1 }}
         >
             {renderHeader()}
             {renderLogo()}
 
-            <View style={styles.container}>
+            {permitted ?
+                <View style={styles.container}>
 
 
-                <BarCodeScanner
-                    onBarCodeScanned={scanned && code != null ?
-                        navigation.reset({
-                            index: 0,
-                            routes: [{
-                                name: 'AddSale',
-                                params: {
-                                    scanned: scanned,
-                                    scannedcode: code,
-                                }
-                            }],
-                        }) : handleBarCodeScanned}
-                    style={StyleSheet.absoluteFillObject}
-                />
+                    <BarCodeScanner
+                        onBarCodeScanned={scanned && code != null ?
+                            navigation.reset({
+                                index: 0,
+                                routes: [{
+                                    name: 'AddSale',
+                                    params: {
+                                        scanned: scanned,
+                                        scannedcode: code,
+                                    }
+                                }],
+                            }) : handleBarCodeScanned}
+                        style={StyleSheet.absoluteFillObject}
+                    />
 
-                <Image
-                    source={icons.scanning}
-                    style={{
-                        height: 200,
-                        width: 200,
-                        padding: 5,
-                        alignItems: 'center',
-                        tintColor: COLORS.white
-                    }}
-                />
-                {/*{scanned ? actionsButton() : null }*/}
-                {scanned && <Button title={'Tap to Scan Again'} onPress={() => setScanned(false)} />}
-            </View>
+                    <Image
+                        source={icons.scanning}
+                        style={{
+                            height: 200,
+                            width: 200,
+                            padding: 5,
+                            alignItems: 'center',
+                            tintColor: COLORS.white
+                        }}
+                    />
+                    {/*{scanned ? actionsButton() : null }*/}
+                    {scanned && <Button title={'Tap to Scan Again'} onPress={() => setScanned(false)} />}
+                </View>
+                : null }
         </LinearGradient>
     );
+
 }
 
 const styles = StyleSheet.create({

@@ -1,8 +1,8 @@
 {
   "ExpandedNodes": [
     "",
-    "\\android"
+    "\\screens"
   ],
-  "SelectedNode": "\\app.json",
+  "SelectedNode": "\\screens\\Scanner.js",
   "PreviewInSolutionExplorer": false
 }
